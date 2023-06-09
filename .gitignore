@@ -1,0 +1,14 @@
+*.o
+*.out
+linux-*
+include/*-linux-ouma*/asm/
+include/asm-generic/
+include/linux/
+include/misc/
+include/mtd/
+include/rdma/
+include/scsi/
+include/sound/
+include/video/
+include/xen/
+/target

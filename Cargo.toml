@@ -1,0 +1,18 @@
+[package]
+name = "ouma"
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+name = "c"
+crate-type = ["staticlib", "cdylib"]
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]
+cbitset = "0.2.0"
+syscalls = { version = "0.6", default-features = false }

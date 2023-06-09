@@ -1,0 +1,33 @@
+{
+  "arch": "aarch64",
+  "data-layout": "e-m:e-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128",
+  "dynamic-linking": true,
+  "env": "ouma",
+  "features": "+v8a,+outline-atomics",
+  "has-thread-local": true,
+  "llvm-target": "aarch64-unknown-linux-ouma",
+  "max-atomic-width": 128,
+  "os": "linux",
+  "supported-sanitizers": [
+    "address",
+    "cfi",
+    "leak",
+    "memory",
+    "memtag",
+    "thread",
+    "hwaddress"
+  ],
+  "supported-split-debuginfo": [
+    "packed",
+    "unpacked",
+    "off"
+  ],
+  "supports-xray": true,
+  "target-family": [
+    "unix"
+  ],
+  "target-mcount": "\u0001_mcount",
+  "target-pointer-width": "64",
+  "linker-flavor": "ld.lld",
+  "linker": "rust-lld"
+}
