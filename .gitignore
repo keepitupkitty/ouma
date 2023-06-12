@@ -1,5 +1,8 @@
 *.o
 *.out
+*.elf
+*.so*
+*.a
 linux-*
 include/*-linux-ouma*/asm/
 include/asm-generic/

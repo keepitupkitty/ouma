@@ -1,5 +1,6 @@
 // Configuration
 #define USE_DL_PREFIX 1
+#define MSPACES 1
 
 // Limit our malloc
 #define USE_LOCKS 0
