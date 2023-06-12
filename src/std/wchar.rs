@@ -512,6 +512,17 @@ pub extern "C" fn ouma_wcstok(
 }
 
 #[no_mangle]
+pub extern "C" fn ouma_wcsdup(s: *const wchar_t) -> *mut wchar_t {
+  let len = wstring_length(s) + 1;
+  let c: *mut wchar_t = stdlib::ouma_malloc(len) as *mut wchar_t;
+  if c.is_null() {
+    return ptr::null_mut();
+  }
+  ouma_wmemcpy(c, s, len);
+  c
+}
+
+#[no_mangle]
 pub extern "C" fn ouma_wcscoll(
   s1: *const wchar_t,
   s2: *const wchar_t

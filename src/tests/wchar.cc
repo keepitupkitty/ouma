@@ -34,6 +34,7 @@ extern "C" {
   int ouma_wcscoll_l(const wchar_t *, const wchar_t *, locale_t);
   size_t ouma_wcsxfrm(wchar_t *__restrict, const wchar_t *__restrict, size_t);
   size_t ouma_wcsxfrm_l(wchar_t *__restrict, const wchar_t *__restrict, size_t, locale_t);
+  wchar_t *ouma_wcsdup(const wchar_t *);
   int ouma_wctob(wint_t);
   int ouma_mbsinit(const mbstate_t *);
   size_t ouma_mbrtowc(wchar_t *__restrict, const char *__restrict, size_t, mbstate_t *__restrict);
@@ -47,10 +48,6 @@ extern "C" {
   int ouma_wcwidth(wchar_t);
   int ouma_wcswidth(const wchar_t *, size_t);
 
-/* When malloc gets added
-  wchar_t *ouma_wcsdup(const wchar_t *);
-*/
-
 /* When ctype support gets added
   int ouma_wcscasecmp(const wchar_t *, const wchar_t *);
   int ouma_wcscasecmp_l(const wchar_t *, const wchar_t *, locale_t);
@@ -58,6 +55,7 @@ extern "C" {
   int ouma_wcsncasecmp_l(const wchar_t *, const wchar_t *, size_t, locale_t);
 */
 
+  extern void ouma_free(void *);
   extern _Thread_local int __oumalibc_errno;
 }
 
@@ -282,6 +280,11 @@ TEST(wcstok, example) {
   ASSERT_EQ(NULL, ouma_wcstok(NULL, split, &lastws));
 }
 
+TEST(wcsdup, hello) {
+  wchar_t *copy = ouma_wcsdup(L"Hello");
+  ASSERT_STREQ(L"Hello", copy);
+  ouma_free(copy);
+}
 
 TEST(wctob, example) {
   ASSERT_EQ(EOF, ouma_wctob(WEOF));
