@@ -18,7 +18,6 @@
 #define _NETINET_IN_H
 
 #include <linux/socket.h>
-#include <netinet/in6.h>
 #include <sys/cdefs.h>
 #include <sys/socket.h>
 #define __kernel_sockaddr_storage sockaddr_storage
