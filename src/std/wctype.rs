@@ -265,8 +265,8 @@ pub extern "C" fn ouma_iswcntrl_l(
 
 #[no_mangle]
 pub extern "C" fn ouma_iswctype(
-  wc: wint_t,
-  cc: wctype_t
+  _wc: wint_t,
+  _cc: wctype_t
 ) -> c_int {
   // TODO: add iswctype
   0

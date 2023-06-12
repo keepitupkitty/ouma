@@ -1,11 +1,12 @@
 use {
   crate::{
+    alloc::borrow::ToOwned,
     c_char,
     c_int,
     c_uchar,
     locale_t,
     size_t,
-    std::{errno, signal},
+    std::{errno, signal, stdlib},
     support::streamwriter
   },
   cbitset::BitSet256,
@@ -635,41 +636,64 @@ pub extern "C" fn ouma_strerror_l(
 static mut sig_buf: [u8; 255] = [0; 255];
 
 #[inline(always)]
-fn inner_strsignal(
+fn build_sigstring(
   num: c_int,
   buf: *mut c_char,
   len: usize
 ) -> *const c_char {
   let mut n = num;
-
-  let signame = if n >= 0 && n < signal::NSIG {
-    signal::SYS_SIG_LIST[n as usize].as_ptr() as *const c_char
-  } else {
-    ptr::null_mut()
-  };
-  if !signame.is_null() {
-    return signame;
-  }
-
   let prefix = if n >= signal::SIGRTMIN && n <= signal::SIGRTMAX {
     n -= signal::SIGRTMIN;
     "Real-time"
   } else {
     "Unknown"
   };
+  if len < prefix.len() + 1 + "signal".len() {
+    return (prefix.to_owned() + " signal").as_ptr() as *const c_char;
+  }
 
   let mut w = streamwriter::StringWriter::new(buf, len);
   let _ = w.write_fmt(format_args!("{} signal {}", prefix, n));
-
-  // TODO: compare fmt len to buflen
 
   buf
 }
 
 #[no_mangle]
 pub extern "C" fn ouma_strsignal(num: c_int) -> *mut c_char {
-  unsafe {
-    inner_strsignal(num, sig_buf.as_ptr() as *mut c_char, sig_buf.len())
-      as *mut c_char
+  if num >= 0 && (num as usize) < signal::SYS_SIG_LIST.len() {
+    signal::SYS_SIG_LIST[num as usize].as_ptr() as *mut c_char
+  } else {
+    unsafe {
+      build_sigstring(num, sig_buf.as_ptr() as *mut c_char, sig_buf.len())
+        as *mut c_char
+    }
   }
+}
+
+#[no_mangle]
+pub extern "C" fn ouma_strndup(
+  s: *const c_char,
+  sz: size_t
+) -> *mut c_char {
+  let len = ouma_strnlen(s, sz);
+  let c: *mut c_char = stdlib::ouma_malloc(len + 1) as *mut c_char;
+  if c.is_null() {
+    return ptr::null_mut();
+  }
+  ouma_memcpy(c as *mut c_void, s as *const c_void, len);
+  unsafe {
+    *c.wrapping_offset(len as isize) = b'\0' as c_char;
+  }
+  c
+}
+
+#[no_mangle]
+pub extern "C" fn ouma_strdup(s: *const c_char) -> *mut c_char {
+  let len = string_length(s) + 1;
+  let c: *mut c_char = stdlib::ouma_malloc(len) as *mut c_char;
+  if c.is_null() {
+    return ptr::null_mut();
+  }
+  ouma_memcpy(c as *mut c_void, s as *const c_void, len);
+  c
 }

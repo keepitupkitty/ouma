@@ -1,7 +1,7 @@
 // Adopted from Redox relibc
 
 use {
-  crate::size_t,
+  crate::{c_int, size_t},
   alloc::alloc::{GlobalAlloc, Layout},
   core::{
     ffi::c_void,
@@ -10,15 +10,30 @@ use {
 };
 
 extern "C" {
-  fn mspace_memalign(
+  pub fn mspace_memalign(
     msp: usize,
     alignment: size_t,
     bytes: size_t
   ) -> *mut c_void;
-  fn mspace_free(
+  pub fn mspace_free(
     msp: usize,
     mem: *mut c_void
   );
+  pub fn dlcalloc(
+    n: size_t,
+    l: size_t
+  ) -> *mut c_void;
+  pub fn dlfree(ptr: *mut c_void);
+  pub fn dlmalloc(n: size_t) -> *mut c_void;
+  pub fn dlposix_memalign(
+    ptr: *mut *mut c_void,
+    n: size_t,
+    l: size_t
+  ) -> c_int;
+  pub fn dlrealloc(
+    ptr: *mut c_void,
+    n: size_t
+  ) -> *mut c_void;
 }
 
 pub struct Dlmalloc {

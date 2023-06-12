@@ -33,8 +33,7 @@ CRTFLAGS += -target $(CCTRIPLE) -Iinclude -Iinclude/$(CCTRIPLE) -Icsu
 BUILDDIR = $(shell pwd)/target/$(ACTUAL_TARGET)/$(BUILDTYPE)
 
 CARGO_TARGETS = \
-	$(BUILDDIR)/libc.a \
-	$(BUILDDIR)/libc.so
+	$(BUILDDIR)/libc.a
 
 CRT_TARGETS = \
 	$(BUILDDIR)/ouma_rt.crt1.o \

@@ -36,11 +36,8 @@ extern "C" {
   char *ouma_strerror(int);
   char *ouma_strerror_l(int, locale_t);
   char *ouma_strsignal(int);
-
-/* When malloc gets added
   char *ouma_strndup(const char *, size_t);
   char *ouma_strdup(const char *);
-*/
 
 /* When ctype support gets added
   int ouma_ffs(int);
@@ -50,6 +47,7 @@ extern "C" {
   int ouma_strncasecmp_l(const char *, const char *, size_t, locale_t);
 */
 
+  extern void ouma_free(void *);
   extern _Thread_local int __oumalibc_errno;
   extern int __oumalibc_current_sigrtmax();
   extern int __oumalibc_current_sigrtmin();
@@ -754,13 +752,31 @@ TEST(strsignal, example) {
       "Real-time signal 30", "Real-time signal 31", "Real-time signal 32",
   };
 
-//  for (int i = 0; i < __oumalibc_current_sigrtmax() - __oumalibc_current_sigrtmin(); ++i) {
-//    EXPECT_STREQ(ouma_strsignal(i + __oumalibc_current_sigrtmin()), rt_message_array[i]);
-//  }
+  for (int i = 0; i < __oumalibc_current_sigrtmax() - __oumalibc_current_sigrtmin(); ++i) {
+    EXPECT_STREQ(ouma_strsignal(i + __oumalibc_current_sigrtmin()), rt_message_array[i]);
+  }
 
   ASSERT_STREQ(ouma_strsignal(-1), "Unknown signal -1");
   ASSERT_STREQ(ouma_strsignal(65), "Unknown signal 65");
   ASSERT_STREQ(ouma_strsignal(2147483647), "Unknown signal 2147483647");
   ASSERT_STREQ(ouma_strsignal(-2147483648),
                "Unknown signal -2147483648");
+}
+
+TEST(strndup, null) {
+  char *copy = ouma_strndup(NULL, 0);
+  ASSERT_STREQ("", copy);
+  ouma_free(copy);
+}
+
+TEST(strndup, hello) {
+  char *copy = ouma_strndup("Hello, world", 5);
+  ASSERT_STREQ("Hello", copy);
+  ouma_free(copy);
+}
+
+TEST(strdup, hello) {
+  char *copy = ouma_strdup("Hello");
+  ASSERT_STREQ("Hello", copy);
+  ouma_free(copy);
 }
