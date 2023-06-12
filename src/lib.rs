@@ -2,9 +2,11 @@
 #![allow(unused_macros, non_camel_case_types, non_upper_case_globals)]
 #![feature(lang_items, no_sanitize, thread_local)]
 
+extern crate alloc;
 extern crate cbitset;
 
 mod api;
+mod dlmalloc;
 #[macro_use]
 mod macros;
 mod types;

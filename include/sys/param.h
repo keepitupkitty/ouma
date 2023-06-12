@@ -21,7 +21,9 @@
 #include <limits.h>
 #include <linux/limits.h>
 #include <linux/param.h>
+#if 0 // TODO: add signal.h
 #include <signal.h> /* Define NSIG.  */
+#endif
 #include <sys/_null.h>
 #include <sys/types.h>
 
