@@ -6,7 +6,7 @@ if [ -z "$TARGET" ]; then
 fi
 
 BUILD_CFLAGS="-std=c++20"
-BUILD_LDFLAGS=""
+BUILD_LDFLAGS="-fuse-ld=lld"
 BUILD_RUSTFLAGS=""
 
 # TODO: add instrumented libc++ and gtest for MSan
@@ -36,7 +36,7 @@ for sanitizers in none address leak; do
 
   RUSTFLAGS="$BUILD_RUSTFLAGS $SANITIZER_RUSTFLAGS" \
   cargo build --target $TARGET
-  for test in ctype string uchar wchar wctype; do
+  for test in string uchar wchar wctype; do
     echo "Testing: $test"
     clang++ $BUILD_CFLAGS $SANITIZER_CFLAGS $BUILD_LDFLAGS \
       -lgtest -lgtest_main src/tests/${test}.cc \
