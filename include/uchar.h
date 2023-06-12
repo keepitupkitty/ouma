@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _UCHAR_H_
-#define _UCHAR_H_
+#ifndef _UCHAR_H
+#define _UCHAR_H
 
 #include <sys/_maintypes.h>
 #include <sys/cdefs.h>
@@ -49,4 +49,4 @@ size_t mbrtoc32(char32_t *__restrict, const char *__restrict, size_t,
                 mbstate_t *__restrict);
 __END_DECLS
 
-#endif /* !_UCHAR_H_ */
+#endif /* !_UCHAR_H */

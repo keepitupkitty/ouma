@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _TAR_H_
-#define _TAR_H_
+#ifndef _TAR_H
+#define _TAR_H
 
 #define TMAGIC "ustar" /* ustar and a null */
 #define TMAGLEN 6
@@ -48,4 +48,4 @@
 #define TOWRITE 00002 /* Write by other */
 #define TOEXEC 00001  /* Execute/Search by other */
 
-#endif /* !_TAR_H_ */
+#endif /* !_TAR_H */

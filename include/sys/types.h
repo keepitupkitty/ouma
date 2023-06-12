@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _SYS_TYPES_H_
-#define _SYS_TYPES_H_
+#ifndef _SYS_TYPES_H
+#define _SYS_TYPES_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -180,4 +180,4 @@ typedef struct {
   int __val[2];
 } fsid_t;
 
-#endif /* _SYS_TYPES_H_ */
+#endif /* _SYS_TYPES_H */

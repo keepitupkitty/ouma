@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-#ifndef _NETINET_IF_FDDI_H_
-#define _NETINET_IF_FDDI_H_
+#ifndef _NETINET_IF_FDDI_H
+#define _NETINET_IF_FDDI_H
 
 #include <linux/if_fddi.h>
 #include <stdint.h>
 #include <sys/types.h>
 
-#ifdef _GNU_SOURCE_
-
+#if defined(__BSD_VISIBLE_)
 struct fddi_header {
-  uint8_t fddi_fc;                 /* Frame Control (FC) value */
-  uint8_t fddi_dhost[FDDI_K_ALEN]; /* Destination host */
-  uint8_t fddi_shost[FDDI_K_ALEN]; /* Source host */
+  uint8_t fddi_fc;
+  uint8_t fddi_dhost[FDDI_K_ALEN];
+  uint8_t fddi_shost[FDDI_K_ALEN];
 };
-#endif /* !_GNU_SOURCE_ */
+#endif
 
-#endif /* !_NETINET_IF_FDDI_H_ */
+#endif /* !_NETINET_IF_FDDI_H */

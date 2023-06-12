@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MACHINE__LIMITS_H_
-#define _MACHINE__LIMITS_H_
+#ifndef _MACHINE__LIMITS_H
+#define _MACHINE__LIMITS_H
 
 #include <sys/cdefs.h>
 
@@ -51,4 +51,4 @@
 
 #define __WORD_BIT 32
 
-#endif /* !_MACHINE__LIMITS_H_ */
+#endif /* !_MACHINE__LIMITS_H */

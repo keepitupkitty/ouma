@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _NETPACKET_PACKET_H_
-#define _NETPACKET_PACKET_H_
+#ifndef _NETPACKET_PACKET_H
+#define _NETPACKET_PACKET_H
 
 struct sockaddr_ll {
   unsigned short int sll_family;
@@ -27,17 +27,13 @@ struct sockaddr_ll {
   unsigned char sll_addr[8];
 };
 
-/* Packet types.  */
-
-#define PACKET_HOST 0      /* To us.  */
-#define PACKET_BROADCAST 1 /* To all.  */
-#define PACKET_MULTICAST 2 /* To group.  */
-#define PACKET_OTHERHOST 3 /* To someone else.  */
-#define PACKET_OUTGOING 4  /* Originated by us . */
+#define PACKET_HOST 0
+#define PACKET_BROADCAST 1
+#define PACKET_MULTICAST 2
+#define PACKET_OTHERHOST 3
+#define PACKET_OUTGOING 4
 #define PACKET_LOOPBACK 5
 #define PACKET_FASTROUTE 6
-
-/* Packet socket options.  */
 
 #define PACKET_ADD_MEMBERSHIP 1
 #define PACKET_DROP_MEMBERSHIP 2
@@ -74,4 +70,4 @@ struct packet_mreq {
 #define PACKET_MR_ALLMULTI 2
 #define PACKET_MR_UNICAST 3
 
-#endif /* !_NETPACKET_PACKET_H_ */
+#endif /* !_NETPACKET_PACKET_H */

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef _MACHINE_ENDIAN_H_
-#define _MACHINE_ENDIAN_H_
+#ifndef _MACHINE_ENDIAN_H
+#define _MACHINE_ENDIAN_H
 
 #include <sys/_endian.h>
 #include <sys/_maintypes.h>
 
-#endif /* !_MACHINE_ENDIAN_H_ */
+#endif /* !_MACHINE_ENDIAN_H */

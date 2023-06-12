@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef _NETINET_IP_ICMP_H_
-#define _NETINET_IP_ICMP_H_
+#ifndef _NETINET_IP_ICMP_H
+#define _NETINET_IP_ICMP_H
 
 #include <stdint.h>
 #include <sys/types.h>
 
 __BEGIN_DECLS
-
 struct icmphdr {
   uint8_t type; /* message type */
   uint8_t code; /* type sub-code */
@@ -83,7 +82,25 @@ struct icmphdr {
 #define ICMP_EXC_TTL 0      /* TTL count exceeded		*/
 #define ICMP_EXC_FRAGTIME 1 /* Fragment Reass time exceeded	*/
 
-#ifdef _GNU_SOURCE_
+/* Codes for ICMP_EXT_ECHO (PROBE) */
+#define ICMP_EXT_ECHO 42
+#define ICMP_EXT_ECHOREPLY 43
+#define ICMP_EXT_CODE_MAL_QUERY 1    /* Malformed Query */
+#define ICMP_EXT_CODE_NO_IF 2        /* No such Interface */
+#define ICMP_EXT_CODE_NO_TABLE_ENT 3 /* No table entry */
+#define ICMP_EXT_CODE_MULT_IFS 4     /* Multiple Interfaces Satisfy Query */
+
+/* Constants for EXT_ECHO (PROBE) */
+#define ICMP_EXT_ECHOREPLY_ACTIVE (1 << 2) /* active bit in reply */
+#define ICMP_EXT_ECHOREPLY_IPV4 (1 << 1)   /* ipv4 bit in reply */
+#define ICMP_EXT_ECHOREPLY_IPV6 1          /* ipv6 bit in reply */
+#define ICMP_EXT_ECHO_CTYPE_NAME 1
+#define ICMP_EXT_ECHO_CTYPE_INDEX 2
+#define ICMP_EXT_ECHO_CTYPE_ADDR 3
+#define ICMP_AFI_IP 1  /* Address Family Identifier for IPV4 */
+#define ICMP_AFI_IP6 2 /* Address Family Identifier for IPV6 */
+
+#if defined(__BSD_VISIBLE_)
 /*
  * Copyright (c) 1982, 1986, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -253,15 +270,14 @@ struct icmp {
 /* PARAMPROB code */
 #define ICMP_PARAMPROB_OPTABSENT 1 /* req. opt. absent */
 
-#define ICMP_INFOTYPE(type)                                                    \
-  ((type) == ICMP_ECHOREPLY || (type) == ICMP_ECHO ||                          \
-   (type) == ICMP_ROUTERADVERT || (type) == ICMP_ROUTERSOLICIT ||              \
-   (type) == ICMP_TSTAMP || (type) == ICMP_TSTAMPREPLY ||                      \
-   (type) == ICMP_IREQ || (type) == ICMP_IREQREPLY ||                          \
+#define ICMP_INFOTYPE(type)                                       \
+  ((type) == ICMP_ECHOREPLY || (type) == ICMP_ECHO ||             \
+   (type) == ICMP_ROUTERADVERT || (type) == ICMP_ROUTERSOLICIT || \
+   (type) == ICMP_TSTAMP || (type) == ICMP_TSTAMPREPLY ||         \
+   (type) == ICMP_IREQ || (type) == ICMP_IREQREPLY ||             \
    (type) == ICMP_MASKREQ || (type) == ICMP_MASKREPLY)
 
-#endif /* !_GNU_SOURCE_ */
-
+#endif /* __BSD_VISIBLE_ */
 __END_DECLS
 
-#endif /* !_NETINET_IP_ICMP_H_ */
+#endif /* !_NETINET_IP_ICMP_H */

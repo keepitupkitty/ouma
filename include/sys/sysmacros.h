@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef _SYS_SYSMACROS_H_
-#define _SYS_SYSMACROS_H_
+#ifndef _SYS_SYSMACROS_H
+#define _SYS_SYSMACROS_H
 
-#define major(x)                                                               \
+#define major(x) \
   ((unsigned)((((x) >> 31 >> 1) & 0xfffff000) | (((x) >> 8) & 0x00000fff)))
 #define minor(x) ((unsigned)((((x) >> 12) & 0xffffff00) | ((x)&0x000000ff)))
 
@@ -27,4 +27,4 @@
         (((y)&0xffffff00ULL) << 12) | \
 	(((y)&0x000000ffULL))
 
-#endif /* !_SYS_SYSMACROS_H_ */
+#endif /* !_SYS_SYSMACROS_H */

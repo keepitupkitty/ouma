@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef _SYS__ENDIAN_H_
-#define _SYS__ENDIAN_H_
+#ifndef _SYS__ENDIAN_H
+#define _SYS__ENDIAN_H
 
-#if !defined(_MACHINE_ENDIAN_H_) && !defined(_BYTESWAP_H_) &&                  \
-    !defined(_ENDIAN_H_)
+#if !defined(_MACHINE_ENDIAN_H) && !defined(_BYTESWAP_H) && !defined(_ENDIAN_H)
 #error "sys/_endian.h should not be included directly"
 #endif
 
@@ -31,8 +30,8 @@
  */
 #define _LITTLE_ENDIAN __ORDER_LITTLE_ENDIAN__ /* LSB first: 1234 */
 #define _BIG_ENDIAN __ORDER_BIG_ENDIAN__       /* MSB first: 4321 */
-#define _PDP_ENDIAN                                                            \
-  __ORDER_PDP_ENDIAN__ /* LSB first in word,                                   \
+#define _PDP_ENDIAN                          \
+  __ORDER_PDP_ENDIAN__ /* LSB first in word, \
                         * MSW first in long: 3412 */
 
 /*
@@ -97,4 +96,4 @@
 #define le64toh(x) __bswap64((x))
 #endif /* _BYTE_ORDER == _LITTLE_ENDIAN */
 
-#endif /* _SYS__ENDIAN_H_ */
+#endif /* _SYS__ENDIAN_H */

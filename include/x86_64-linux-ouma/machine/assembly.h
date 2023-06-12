@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _MACHINE_ASSEMBLY_H_
-#define _MACHINE_ASSEMBLY_H_
+#ifndef _MACHINE_ASSEMBLY_H
+#define _MACHINE_ASSEMBLY_H
 
 #ifdef PIC
 #define PIC_PLT(x) x @PLT
@@ -34,18 +34,18 @@
 #define CNAME(csym) csym
 #define HIDENAME(asmsym) .asmsym
 
-#define _START_ENTRY                                                           \
-  .text;                                                                       \
+#define _START_ENTRY \
+  .text;             \
   .p2align 4, 0x90
 
-#define ENTRY(x)                                                               \
-  _START_ENTRY;                                                                \
-  .globl CNAME(x);                                                             \
-  .type CNAME(x), @function;                                                   \
-  CNAME(x) :;                                                                  \
+#define ENTRY(x)             \
+  _START_ENTRY;              \
+  .globl CNAME(x);           \
+  .type CNAME(x), @function; \
+  CNAME(x) :;                \
   .cfi_startproc
-#define END(x)                                                                 \
-  .size x, .- x;                                                               \
+#define END(x)   \
+  .size x, .- x; \
   .cfi_endproc
 
-#endif /* !_MACHINE_ASSEMBLY_H_ */
+#endif /* !_MACHINE_ASSEMBLY_H */

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _STRINGS_H_
-#define _STRINGS_H_
+#ifndef _STRINGS_H
+#define _STRINGS_H
 
 #include <sys/_maintypes.h>
 #include <sys/cdefs.h>
@@ -44,4 +44,4 @@ int strncasecmp_l(const char *, const char *, size_t, locale_t);
 #endif
 __END_DECLS
 
-#endif /* !_STRINGS_H_ */
+#endif /* !_STRINGS_H */

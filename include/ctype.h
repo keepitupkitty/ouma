@@ -14,7 +14,54 @@
  * limitations under the License.
  */
 
-#ifndef _CTYPE_H_
-#define _CTYPE_H_
+#ifndef _CTYPE_H
+#define _CTYPE_H
 
-#endif /* !_CTYPE_H_ */
+#include <sys/cdefs.h>
+
+#if __POSIX_VISIBLE >= 200809
+#ifndef _LOCALE_T_DEFINED_
+#define _LOCALE_T_DEFINED_
+typedef void *locale_t;
+#endif
+#endif
+
+__BEGIN_DECLS
+int isalnum(int);
+int isalpha(int);
+int iscntrl(int);
+int isdigit(int);
+int isgraph(int);
+int islower(int);
+int isprint(int);
+int ispunct(int);
+int isspace(int);
+int isupper(int);
+int isxdigit(int);
+int tolower(int);
+int toupper(int);
+
+#if __BSD_VISIBLE || __ISO_C_VISIBLE >= 1999 || __POSIX_VISIBLE > 200112 || \
+    __XPG_VISIBLE > 600
+int isblank(int);
+#endif
+
+#if __POSIX_VISIBLE >= 200809
+int isalnum_l(int, locale_t);
+int isalpha_l(int, locale_t);
+int isblank_l(int, locale_t);
+int iscntrl_l(int, locale_t);
+int isdigit_l(int, locale_t);
+int isgraph_l(int, locale_t);
+int islower_l(int, locale_t);
+int isprint_l(int, locale_t);
+int ispunct_l(int, locale_t);
+int isspace_l(int, locale_t);
+int isupper_l(int, locale_t);
+int isxdigit_l(int, locale_t);
+int tolower_l(int, locale_t);
+int toupper_l(int, locale_t);
+#endif
+__END_DECLS
+
+#endif /* !_CTYPE_H */

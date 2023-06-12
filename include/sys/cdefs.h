@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _SYS_CDEFS_H_
-#define _SYS_CDEFS_H_
+#ifndef _SYS_CDEFS_H
+#define _SYS_CDEFS_H
 
 /*
  * Define Ouma libc macro
@@ -53,7 +53,7 @@
 #endif
 
 #if defined(__GNUC__)
-#define __GNUC_PREREQ__(ma, mi)                                                \
+#define __GNUC_PREREQ__(ma, mi) \
   (__GNUC__ > (ma) || __GNUC__ == (ma) && __GNUC_MINOR__ >= (mi))
 #else
 #define __GNUC_PREREQ__(ma, mi) 0
@@ -70,10 +70,10 @@
 #if __GNUC_PREREQ__(4, 0)
 #define __dso_public __attribute__((__visibility__("default")))
 #define __dso_hidden __attribute__((__visibility__("hidden")))
-#define __BEGIN_PUBLIC_DECLS                                                   \
+#define __BEGIN_PUBLIC_DECLS \
   _Pragma("GCC visibility push(default)") __BEGIN_EXTERN_C
 #define __END_PUBLIC_DECLS __END_EXTERN_C _Pragma("GCC visibility pop")
-#define __BEGIN_HIDDEN_DECLS                                                   \
+#define __BEGIN_HIDDEN_DECLS \
   _Pragma("GCC visibility push(hidden)") __BEGIN_EXTERN_C
 #define __END_HIDDEN_DECLS __END_EXTERN_C _Pragma("GCC visibility pop")
 #else
@@ -132,12 +132,12 @@
 #endif
 
 #if !__GNUC_PREREQ__(2, 95)
-#define __alignof(x)                                                           \
-  __offsetof(                                                                  \
-      struct {                                                                 \
-        char __a;                                                              \
-        x __b;                                                                 \
-      },                                                                       \
+#define __alignof(x) \
+  __offsetof(        \
+      struct {       \
+        char __a;    \
+        x __b;       \
+      },             \
       __b)
 #endif
 
@@ -148,7 +148,7 @@
 #if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L
 
 #if !__has_extension(c_alignas)
-#if (defined(__cplusplus) && __cplusplus >= 201103L) ||                        \
+#if (defined(__cplusplus) && __cplusplus >= 201103L) || \
     __has_extension(cxx_alignas)
 #define _Alignas(x) alignas(x)
 #else
@@ -163,15 +163,15 @@
 #define _Alignof(x) __alignof(x)
 #endif
 
-#if !defined(__cplusplus) && !__has_extension(c_atomic) &&                     \
+#if !defined(__cplusplus) && !__has_extension(c_atomic) && \
     !__has_extension(cxx_atomic) && !__GNUC_PREREQ__(4, 7)
 /*
  * No native support for _Atomic(). Place object in structure to prevent
  * most forms of direct non-atomic access.
  */
-#define _Atomic(T)                                                             \
-  struct {                                                                     \
-    T volatile __val;                                                          \
+#define _Atomic(T)    \
+  struct {            \
+    T volatile __val; \
   }
 #endif
 
@@ -182,7 +182,7 @@
 #endif
 
 #if !__has_extension(c_static_assert)
-#if (defined(__cplusplus) && __cplusplus >= 201103L) ||                        \
+#if (defined(__cplusplus) && __cplusplus >= 201103L) || \
     __has_extension(cxx_static_assert)
 #define _Static_assert(x, y) static_assert(x, y)
 #elif __GNUC_PREREQ__(4, 6) && !defined(__cplusplus)
@@ -202,7 +202,7 @@
  * without actually supporting the thread_local keyword. Don't check for
  * the presence of C++11 when defining _Thread_local.
  */
-#if /* (defined(__cplusplus) && __cplusplus >= 201103L) || */                  \
+#if /* (defined(__cplusplus) && __cplusplus >= 201103L) || */ \
     __has_extension(cxx_thread_local)
 #define _Thread_local thread_local
 #else
@@ -224,12 +224,12 @@
  * order to match _Generic().
  */
 
-#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) ||              \
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) || \
     __has_extension(c_generic_selections)
 #define __generic(expr, t, yes, no) _Generic(expr, t : yes, default : no)
 #elif __GNUC_PREREQ__(3, 1) && !defined(__cplusplus)
-#define __generic(expr, t, yes, no)                                            \
-  __builtin_choose_expr(                                                       \
+#define __generic(expr, t, yes, no) \
+  __builtin_choose_expr(            \
       __builtin_types_compatible_p(__typeof((0, (expr))), t), yes, no)
 #endif
 
@@ -267,9 +267,9 @@
 #define __printflike(fmtarg, firstvararg)
 #define __scanflike(fmtarg, firstvararg)
 #else
-#define __printflike(fmtarg, firstvararg)                                      \
+#define __printflike(fmtarg, firstvararg) \
   __attribute__((__format__(__printf__, fmtarg, firstvararg)))
-#define __scanflike(fmtarg, firstvararg)                                       \
+#define __scanflike(fmtarg, firstvararg) \
   __attribute__((__format__(__scanf__, fmtarg, firstvararg)))
 #endif
 
@@ -287,14 +287,15 @@
  *  _POSIX_C_SOURCE == 2		1003.2-1992 C Language Binding Option
  *					encoded as 199209 below
  *  _POSIX_C_SOURCE == 199309		1003.1b-1993
- *					(1003.1 Issue 4, Single Unix Spec v1, Unix
- *93) _POSIX_C_SOURCE == 199506		1003.1c-1995, 1003.1i-1995, and the
+ *					(1003.1 Issue 4, Single Unix Spec v1,
+ *Unix 93) _POSIX_C_SOURCE == 199506		1003.1c-1995, 1003.1i-1995, and
+ *the
  *omnibus ISO/IEC 9945-1: 1996 (1003.1 Issue 5, Single	Unix Spec v2, Unix 95)
  *  _POSIX_C_SOURCE == 200112		1003.1-2001 (1003.1 Issue 6, Unix 03)
  *  _POSIX_C_SOURCE == 200809		1003.1-2008 (1003.1 Issue 7)
- *					IEEE Std 1003.1-2017 (Rev of 1003.1-2008)
- *is 1003.1-2008 with two TCs applied with _POSIX_C_SOURCE=200809 and
- *_XOPEN_SOURCE=700
+ *					IEEE Std 1003.1-2017 (Rev of
+ *1003.1-2008) is 1003.1-2008 with two TCs applied with _POSIX_C_SOURCE=200809
+ *and _XOPEN_SOURCE=700
  *
  * In addition, the X/Open Portability Guide, which is now the Single UNIX
  * Specification, defines a feature-test macro which indicates the version of
@@ -389,36 +390,28 @@
 #if defined(_ANSI_SOURCE) /* Hide almost everything. */
 #define __POSIX_VISIBLE 0
 #define __XSI_VISIBLE 0
-#define __GNU_VISIBLE 0
 #define __BSD_VISIBLE 0
 #define __ISO_C_VISIBLE 1990
 #define __EXT1_VISIBLE 0
 #elif defined(_C99_SOURCE) /* Localism to specify strict C99 env. */
 #define __POSIX_VISIBLE 0
 #define __XSI_VISIBLE 0
-#define __GNU_VISIBLE 0
 #define __BSD_VISIBLE 0
 #define __ISO_C_VISIBLE 1999
 #define __EXT1_VISIBLE 0
 #elif defined(_C11_SOURCE) /* Localism to specify strict C11 env. */
 #define __POSIX_VISIBLE 0
 #define __XSI_VISIBLE 0
-#define __GNU_VISIBLE 0
 #define __BSD_VISIBLE 0
 #define __ISO_C_VISIBLE 2011
 #define __EXT1_VISIBLE 0
 #else /* Default environment: show everything. */
 #define __POSIX_VISIBLE 200809
 #define __XSI_VISIBLE 700
-#define __GNU_VISIBLE 1
 #define __BSD_VISIBLE 1
 #define __ISO_C_VISIBLE 2011
 #define __EXT1_VISIBLE 1
 #endif
-#endif
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE 0
 #endif
 
 /*
@@ -455,7 +448,7 @@
 #define __builtin_is_aligned(x, align) (((__uintptr_t)x & ((align)-1)) == 0)
 #endif
 #if !__has_builtin(__builtin_align_up)
-#define __builtin_align_up(x, align)                                           \
+#define __builtin_align_up(x, align) \
   ((__typeof__(x))(((__uintptr_t)(x) + ((align)-1)) & (~((align)-1))))
 #endif
 #if !__has_builtin(__builtin_align_down)
@@ -466,4 +459,4 @@
 #define __align_down(x, y) __builtin_align_down(x, y)
 #define __is_aligned(x, y) __builtin_is_aligned(x, y)
 
-#endif /* !_SYS_CDEFS_H_ */
+#endif /* !_SYS_CDEFS_H */

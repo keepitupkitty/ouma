@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _WCHAR_H_
-#define _WCHAR_H_
+#ifndef _WCHAR_H
+#define _WCHAR_H
 
 #include <sys/_maintypes.h>
 #include <sys/_null.h>
@@ -68,4 +68,4 @@ typedef void *locale_t;
 #endif
 #endif
 
-#endif /* !_WCHAR_H_ */
+#endif /* !_WCHAR_H */

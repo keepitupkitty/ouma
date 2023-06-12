@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ASSERT_H_
-#define _ASSERT_H_
+#ifndef _ASSERT_H
+#define _ASSERT_H
 
 #include <sys/cdefs.h>
 
@@ -24,7 +24,7 @@
 #define _assert(e) ((void)0)
 #else
 #define _assert(e) assert(e)
-#define assert(e)                                                              \
+#define assert(e) \
   ((e) ? (void)0 : __oumalibc_assert(__FILE__, __LINE__, __func__, #e))
 #endif
 
@@ -45,4 +45,4 @@ __BEGIN_DECLS
 void __oumalibc_assert(const char *, int, const char *, const char *);
 __END_DECLS
 
-#endif /* !_ASSERT_H_ */
+#endif /* !_ASSERT_H */

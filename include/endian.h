@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef _ENDIAN_H_
-#define _ENDIAN_H_
+#ifndef _ENDIAN_H
+#define _ENDIAN_H
 
 #include <machine/endian.h>
 
-#endif /* !_ENDIAN_H_ */
+#endif /* !_ENDIAN_H */

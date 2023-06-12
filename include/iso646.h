@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ISO646_H_
-#define _ISO646_H_
+#ifndef _ISO646_H
+#define _ISO646_H
 
 #ifndef __cplusplus
 
@@ -33,4 +33,4 @@
 
 #endif /* !__cplusplus */
 
-#endif /* !_ISO646_H_ */
+#endif /* !_ISO646_H */

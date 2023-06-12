@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ERRNO_H_
-#define _ERRNO_H_
+#ifndef _ERRNO_H
+#define _ERRNO_H
 
 #include <linux/errno.h>
 #include <sys/cdefs.h>
@@ -26,4 +26,4 @@ extern _Thread_local int __oumalibc_errno;
 #define errno __oumalibc_errno
 __END_DECLS
 
-#endif /* !_ERRNO_H_ */
+#endif /* !_ERRNO_H */

@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef _NETINET_IN_SYSTM_H_
-#define _NETINET_IN_SYSTM_H_
+#ifndef _NETINET_IN_SYSTM_H
+#define _NETINET_IN_SYSTM_H
 
 #include <stdint.h>
 #include <sys/types.h>
 
 __BEGIN_DECLS
+typedef uint16_t n_short;
+typedef uint32_t n_long;
+typedef uint32_t n_time;
+__END_DECL
 
-/*
- * Network order versions of various data types. Unfortunately, BSD
- * assumes specific sizes for shorts (16 bit) and longs (32 bit) which
- * don't hold in general. As a consequence, the network order versions
- * may not reflect the actual size of the native data types.
- */
-
-typedef uint16_t n_short; /* short as received from the net */
-typedef uint32_t n_long;  /* long as received from the net  */
-typedef uint32_t n_time;  /* ms since 00:00 GMT, byte rev   */
-
-__END_DECLS
-
-#endif /* !_NETINET_IN_SYSTM_H_ */
+#endif /* !_NETINET_IN_SYSTM_H */

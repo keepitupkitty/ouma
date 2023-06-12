@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-#ifndef _NETINET_ETHER_H_
-#define _NETINET_ETHER_H_
+#ifndef _NETINET_ETHER_H
+#define _NETINET_ETHER_H
 
 #include <netinet/if_ether.h>
 #include <sys/cdefs.h>
 
-#ifdef _GNU_SOURCE_
-// TODO: implement netinet/ether.h in Rust
 __BEGIN_DECLS
-struct ether_addr *ether_aton(const char *);
-struct ether_addr *ether_aton_r(const char *, struct ether_addr *);
 char *ether_ntoa(const struct ether_addr *);
 char *ether_ntoa_r(const struct ether_addr *, char *);
+struct ether_addr *ether_aton(const char *);
+struct ether_addr *ether_aton_r(const char *, struct ether_addr *);
 int ether_ntohost(char *, const struct ether_addr *);
 int ether_hostton(const char *, struct ether_addr *);
 int ether_line(const char *, struct ether_addr *, char *);
 __END_DECLS
-#endif /* !_GNU_SOURCE_ */
 
-#endif /* !_NETINET_ETHER_H_ */
+#endif /* !_NETINET_ETHER_H */

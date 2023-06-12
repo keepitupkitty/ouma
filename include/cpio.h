@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _CPIO_H_
-#define _CPIO_H_
+#ifndef _CPIO_H
+#define _CPIO_H
 
 #define C_ISSOCK 0140000 /* Socket. */
 #define C_ISLNK 0120000  /* Symbolic link. */
@@ -38,4 +38,4 @@
 #define C_IWOTH 0000002  /* Write by others. */
 #define C_IXOTH 0000001  /* Execute by others. */
 
-#endif /* !_CPIO_H_ */
+#endif /* !_CPIO_H */

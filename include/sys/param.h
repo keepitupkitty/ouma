@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef _SYS_PARAM_H_
-#define _SYS_PARAM_H_
+#ifndef _SYS_PARAM_H
+#define _SYS_PARAM_H
 
 #include <endian.h> /* Define BYTE_ORDER et al.  */
 #include <limits.h>
+#include <linux/limits.h>
+#include <linux/param.h>
 #include <signal.h> /* Define NSIG.  */
 #include <sys/_null.h>
 #include <sys/types.h>
-
-#include <linux/limits.h>
-#include <linux/param.h>
 
 #define MAXPATHLEN PATH_MAX
 #define MAXSYMLINKS 8
@@ -91,8 +90,8 @@
 #define howmany(x, y) (((x) + ((y)-1)) / (y))
 #endif
 #ifdef __GNUC__
-#define roundup(x, y)                                                          \
-  (__builtin_constant_p(y) && powerof2(y) ? (((x) + (y)-1) & ~((y)-1))         \
+#define roundup(x, y)                                                  \
+  (__builtin_constant_p(y) && powerof2(y) ? (((x) + (y)-1) & ~((y)-1)) \
                                           : ((((x) + ((y)-1)) / (y)) * (y)))
 #else
 #define roundup(x, y) ((((x) + ((y)-1)) / (y)) * (y))
@@ -103,4 +102,4 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-#endif /* !_SYS_PARAM_H_ */
+#endif /* !_SYS_PARAM_H */

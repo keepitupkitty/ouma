@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef _NETINET_IP_H_
-#define _NETINET_IP_H_
-
-#include <sys/cdefs.h>
-#include <sys/types.h>
+#ifndef _NETINET_IP_H
+#define _NETINET_IP_H
 
 #include <netinet/in.h>
+#include <sys/types.h>
 
 __BEGIN_DECLS
-
 struct timestamp {
   uint8_t len;
   uint8_t ptr;
@@ -61,7 +58,7 @@ struct iphdr {
   /*The options start here. */
 };
 
-#ifdef _GNU_SOURCE_
+#if defined(__BSD_VISIBLE_)
 /*
  * Copyright (c) 1982, 1986, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -141,7 +138,7 @@ struct ip_timestamp {
 #endif
   uint32_t data[9];
 };
-#endif /* _GNU_SOURCE_ */
+#endif /* __BSD_VISIBLE_ */
 
 #define IPVERSION 4        /* IP version number */
 #define IP_MAXPACKET 65535 /* maximum packet size */
@@ -291,7 +288,6 @@ struct ip_timestamp {
 #define IPTTLDEC 1   /* subtracted when forwarding */
 
 #define IP_MSS 576 /* default maximum segment size */
-
 __END_DECLS
 
-#endif /* !_NETINET_IP_H_ */
+#endif /* !_NETINET_IP_H */

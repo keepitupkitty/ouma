@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _SYS_TTYDEFAULTS_H_
-#define _SYS_TTYDEFAULTS_H_
+#ifndef _SYS_TTYDEFAULTS_H
+#define _SYS_TTYDEFAULTS_H
 
 /*
  * Defaults on "first" open.
@@ -61,4 +61,4 @@
 #define CRPRNT CREPRINT
 #define CFLUSH CDISCARD
 
-#endif /* !_SYS_TTYDEFAULTS_H_ */
+#endif /* !_SYS_TTYDEFAULTS_H */

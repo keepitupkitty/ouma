@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _LOCALE_H_
-#define _LOCALE_H_
+#ifndef _LOCALE_H
+#define _LOCALE_H
 
 #include <sys/_maintypes.h>
 #include <sys/_null.h>
@@ -48,10 +48,10 @@
 #define LC_MEASUREMENT_MASK (1 << LC_MEASUREMENT)
 #define LC_IDENTIFICATION_MASK (1 << LC_IDENTIFICATION)
 
-#define LC_ALL_MASK                                                            \
-  (LC_CTYPE_MASK | LC_NUMERIC_MASK | LC_TIME_MASK | LC_COLLATE_MASK |          \
-   LC_MONETARY_MASK | LC_MESSAGES_MASK | LC_PAPER_MASK | LC_NAME_MASK |        \
-   LC_ADDRESS_MASK | LC_TELEPHONE_MASK | LC_MEASUREMENT_MASK |                 \
+#define LC_ALL_MASK                                                     \
+  (LC_CTYPE_MASK | LC_NUMERIC_MASK | LC_TIME_MASK | LC_COLLATE_MASK |   \
+   LC_MONETARY_MASK | LC_MESSAGES_MASK | LC_PAPER_MASK | LC_NAME_MASK | \
+   LC_ADDRESS_MASK | LC_TELEPHONE_MASK | LC_MEASUREMENT_MASK |          \
    LC_IDENTIFICATION_MASK)
 
 #if __POSIX_VISIBLE >= 200809
@@ -88,4 +88,4 @@ struct lconv {
   char int_n_sign_posn;
 };
 
-#endif /* !_LOCALE_H_ */
+#endif /* !_LOCALE_H */

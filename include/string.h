@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _STRING_H_
-#define _STRING_H_
+#ifndef _STRING_H
+#define _STRING_H
 
 #include <sys/_maintypes.h>
 #include <sys/_null.h>
@@ -91,4 +91,4 @@ size_t strxfrm_l(char *__restrict, const char *__restrict, size_t, locale_t);
 #endif
 __END_DECLS
 
-#endif /* !_STRING_H_ */
+#endif /* !_STRING_H */

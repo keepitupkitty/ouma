@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef _MACHINE_ASSEMBLY_H_
-#define _MACHINE_ASSEMBLY_H_
+#ifndef _MACHINE_ASSEMBLY_H
+#define _MACHINE_ASSEMBLY_H
 
-#define LENTRY(sym)                                                            \
-  .text;                                                                       \
-  .align 2;                                                                    \
-  .type sym, #function;                                                        \
-  sym:                                                                         \
+#define LENTRY(sym)     \
+  .text;                \
+  .align 2;             \
+  .type sym, #function; \
+  sym:                  \
   .cfi_startproc
-#define ENTRY(sym)                                                             \
-  .globl sym;                                                                  \
+#define ENTRY(sym) \
+  .globl sym;      \
   LENTRY(sym)
-#define LEND(sym)                                                              \
-  .ltorg;                                                                      \
-  .cfi_endproc;                                                                \
+#define LEND(sym) \
+  .ltorg;         \
+  .cfi_endproc;   \
   .size sym, .- sym
 #define END(sym) LEND(sym)
 
@@ -41,4 +41,4 @@
 /* Alias for link register x30 */
 #define lr x30
 
-#endif /* !_MACHINE_ASSEMBLY_H_ */
+#endif /* !_MACHINE_ASSEMBLY_H */

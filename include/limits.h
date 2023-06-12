@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _LIMITS_H_
-#define _LIMITS_H_
+#ifndef _LIMITS_H
+#define _LIMITS_H
 
 #include <sys/cdefs.h>
 
@@ -194,4 +194,4 @@
 
 #include <machine/pthread_stack_min.h>
 
-#endif /* !_LIMITS_H_ */
+#endif /* !_LIMITS_H */

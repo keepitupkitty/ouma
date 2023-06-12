@@ -14,9 +14,30 @@
  * limitations under the License.
  */
 
-#ifndef _NETINET_IN_H_
-#define _NETINET_IN_H_
+#ifndef _NETINET_IN_H
+#define _NETINET_IN_H
 
-// TODO: do netinet/in.h
+#include <linux/socket.h>
+#include <netinet/in6.h>
+#include <sys/cdefs.h>
+#include <sys/socket.h>
+#define __kernel_sockaddr_storage sockaddr_storage
+#include <linux/in.h>
+#undef __kernel_sockaddr_storage
+#include <endian.h>
+#include <linux/in6.h>
+#include <linux/ipv6.h>
 
-#endif /* !_NETINET_IN_H_ */
+__BEGIN_DECLS
+// TODO: implement them in rust
+int setipv4sourcefilter(int, struct in_addr, struct in_addr, uint32_t, uint32_t,
+                        struct in_addr *);
+int getipv4sourcefilter(int, struct in_addr, struct in_addr, uint32_t *,
+                        uint32_t *, struct in_addr *);
+int setsourcefilter(int, uint32_t, struct sockaddr *, socklen_t, uint32_t,
+                    uint32_t, struct sockaddr_storage *);
+int getsourcefilter(int, uint32_t, struct sockaddr *, socklen_t, uint32_t *,
+                    uint32_t *, struct sockaddr_storage *);
+__END_DECLS
+
+#endif /* !_NETINET_IN_H */

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef _NETINET_IF_ETHER_H_
-#define _NETINET_IF_ETHER_H_
+#ifndef _NETINET_IF_ETHER_H
+#define _NETINET_IF_ETHER_H
+
+#include <linux/if_ether.h>
 #include <sys/cdefs.h>
 #include <sys/types.h>
 
-/* Get definitions from kernel header file.  */
-#include <linux/if_ether.h>
-
-#ifdef _GNU_SOURCE_
+#if defined(__BSD_VISIBLE_)
 /*
  * Copyright (c) 1982, 1986, 1993
  *	The Regents of the University of California.  All rights reserved.
@@ -59,19 +58,12 @@
 #include <net/if_arp.h>
 
 __BEGIN_DECLS
-/*
- * Ethernet Address Resolution Protocol.
- *
- * See RFC 826 for protocol description.  Structure below is adapted
- * to resolving internet addresses.  Field names used correspond to
- * RFC 826.
- */
 struct ether_arp {
-  struct arphdr ea_hdr;      /* fixed-size header */
-  uint8_t arp_sha[ETH_ALEN]; /* sender hardware address */
-  uint8_t arp_spa[4];        /* sender protocol address */
-  uint8_t arp_tha[ETH_ALEN]; /* target hardware address */
-  uint8_t arp_tpa[4];        /* target protocol address */
+  struct arphdr ea_hdr;
+  uint8_t arp_sha[ETH_ALEN];
+  uint8_t arp_spa[4];
+  uint8_t arp_tha[ETH_ALEN];
+  uint8_t arp_tpa[4];
 };
 #define arp_hrd ea_hdr.ar_hrd
 #define arp_pro ea_hdr.ar_pro
@@ -79,24 +71,16 @@ struct ether_arp {
 #define arp_pln ea_hdr.ar_pln
 #define arp_op ea_hdr.ar_op
 
-/*
- * Macro to map an IP multicast address to an Ethernet multicast address.
- * The high-order 25 bits of the Ethernet address are statically assigned,
- * and the low-order 23 bits are taken from the low end of the IP address.
- */
-#define ETHER_MAP_IP_MULTICAST(ipaddr, enaddr)                                 \
-  /* struct in_addr *ipaddr; */                                                \
-  /* uint8_t enaddr[ETH_ALEN]; */                                              \
-  {                                                                            \
-    (enaddr)[0] = 0x01;                                                        \
-    (enaddr)[1] = 0x00;                                                        \
-    (enaddr)[2] = 0x5e;                                                        \
-    (enaddr)[3] = ((uint8_t *)ipaddr)[1] & 0x7f;                               \
-    (enaddr)[4] = ((uint8_t *)ipaddr)[2];                                      \
-    (enaddr)[5] = ((uint8_t *)ipaddr)[3];                                      \
+#define ETHER_MAP_IP_MULTICAST(ipaddr, enaddr)   \
+  {                                              \
+    (enaddr)[0] = 0x01;                          \
+    (enaddr)[1] = 0x00;                          \
+    (enaddr)[2] = 0x5e;                          \
+    (enaddr)[3] = ((uint8_t *)ipaddr)[1] & 0x7f; \
+    (enaddr)[4] = ((uint8_t *)ipaddr)[2];        \
+    (enaddr)[5] = ((uint8_t *)ipaddr)[3];        \
   }
-
 __END_DECLS
-#endif _GNU_SOURCE /* !_GNU_SOURCE_ */
+#endif /* __BSD_VISIBLE_ */
 
-#endif /* !_NETINET_IF_ETHER_H_ */
+#endif /* !_NETINET_IF_ETHER_H */

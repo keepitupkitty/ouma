@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef _NET_IF_PACKET_H_
-#define _NET_IF_PACKET_H_
+#ifndef _NET_IF_PACKET_H
+#define _NET_IF_PACKET_H
 
 #include <linux/if_packet.h>
 
-#endif /* !_NET_IF_PACKET_H_ */
+#endif /* !_NET_IF_PACKET_H */

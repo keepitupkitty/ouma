@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _SYS__MAINTYPES_H_
-#define _SYS__MAINTYPES_H_
+#ifndef _SYS__MAINTYPES_H
+#define _SYS__MAINTYPES_H
 
 #include <sys/cdefs.h>
 
@@ -159,4 +159,4 @@ typedef __va_list __gnuc_va_list; /* compatibility w/GNU headers*/
  */
 #define __INO64
 
-#endif /* !_SYS__MAINTYPES_H_ */
+#endif /* !_SYS__MAINTYPES_H */

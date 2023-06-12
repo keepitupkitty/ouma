@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef _MACHINE__MAINTYPES_H_
-#define _MACHINE__MAINTYPES_H_
-
-#include <sys/cdefs.h>
+#ifndef _MACHINE__MAINTYPES_H
+#define _MACHINE__MAINTYPES_H
 
 #include <machine/_limits.h>
+#include <sys/cdefs.h>
 
 #define __NO_STRICT_ALIGNMENT
 
@@ -39,4 +38,4 @@ typedef unsigned int ___wchar_t;
 #define __WCHAR_MIN 0          /* min value for a wchar_t */
 #define __WCHAR_MAX __UINT_MAX /* max value for a wchar_t */
 
-#endif /* !_MACHINE__MAINTYPES_H_ */
+#endif /* !_MACHINE__MAINTYPES_H */
