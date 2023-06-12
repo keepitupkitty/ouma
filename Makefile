@@ -1,4 +1,5 @@
 COMPILER ?= clang
+LINKER ?= ld.lld
 RUSTC ?= rustc
 CARGO ?= cargo
 TARGET ?= $(shell $(RUSTC) -Z unstable-options --print target-spec-json | grep llvm-target | cut -d '"' -f4)
@@ -16,6 +17,7 @@ CCTRIPLE =
 ACTUAL_TARGET =
 CRTFLAGS = -nostdlib -nostdinc -ffreestanding -fno-stack-protector
 CARGO_FLAGS = -Ztls-model=initial-exec
+LINKER_FLAGS = -shared -nostdlib -z now -z relro -z noexecstack --icf=safe
 
 ifneq (,$(findstring aarch64,$(TARGET)))
 	CSUARCH = arm64
@@ -33,7 +35,8 @@ CRTFLAGS += -target $(CCTRIPLE) -Iinclude -Iinclude/$(CCTRIPLE) -Icsu
 BUILDDIR = $(shell pwd)/target/$(ACTUAL_TARGET)/$(BUILDTYPE)
 
 CARGO_TARGETS = \
-	$(BUILDDIR)/libc.a
+	$(BUILDDIR)/libc.a \
+	$(BUILDDIR)/libc.so
 
 CRT_TARGETS = \
 	$(BUILDDIR)/ouma_rt.crt1.o \
@@ -48,7 +51,7 @@ ALL_TARGETS = \
 
 all: $(ALL_TARGETS)
 
-$(CARGO_TARGETS):
+$(BUILDDIR)/libc.a:
 	$(CARGO) +nightly rustc $(RELEASE_FLAGS) --target=$(shell pwd)/src/specs/$(ACTUAL_TARGET).json -- $(CARGO_FLAGS)
 
 $(BUILDDIR)/ouma_rt.crt1.o: csu/$(CSUARCH)/crt1.S
@@ -59,6 +62,9 @@ $(BUILDDIR)/ouma_rt.crti.o: csu/$(CSUARCH)/crti.S
 
 $(BUILDDIR)/ouma_rt.crtn.o: csu/$(CSUARCH)/crtn.S
 	$(COMPILER) $(CRTFLAGS) -c $< -o $@
+
+$(BUILDDIR)/libc.so: $(BUILDDIR)/libc.a
+	$(LINKER) $(LINKER_FLAGS) -o $@ --whole-archive $< --no-whole-archive
 
 clean: all
 	rm -rf $(ALL_TARGETS) target

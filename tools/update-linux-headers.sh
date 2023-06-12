@@ -57,6 +57,7 @@ done
 find "$cwd/include" -type f ! -name '*.h' -delete
 
 cd "$cwd"
+rm -rf linux-*
 
 exit 0
 
