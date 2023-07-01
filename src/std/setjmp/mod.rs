@@ -33,6 +33,7 @@ extern "C" {
   ) -> c_int;
 }
 
+#[no_mangle]
 pub extern "C" fn ouma_longjmp(
   buf: *mut jmp_buf,
   c: c_int
@@ -40,6 +41,7 @@ pub extern "C" fn ouma_longjmp(
   unsafe { __oumalibc_longjmp(buf, c) };
 }
 
+#[no_mangle]
 pub extern "C" fn ouma__longjmp(
   buf: *mut jmp_buf,
   c: c_int
@@ -47,6 +49,7 @@ pub extern "C" fn ouma__longjmp(
   unsafe { __oumalibc__longjmp(buf, c) };
 }
 
+#[no_mangle]
 pub extern "C" fn ouma_siglongjmp(
   buf: *mut sigjmp_buf,
   c: c_int
@@ -54,14 +57,17 @@ pub extern "C" fn ouma_siglongjmp(
   unsafe { __oumalibc_siglongjmp(buf, c) };
 }
 
+#[no_mangle]
 pub extern "C" fn ouma_setjmp(buf: *mut jmp_buf) -> c_int {
   unsafe { __oumalibc_setjmp(buf) }
 }
 
+#[no_mangle]
 pub extern "C" fn ouma__setjmp(buf: *mut jmp_buf) -> c_int {
   unsafe { __oumalibc__setjmp(buf) }
 }
 
+#[no_mangle]
 pub extern "C" fn ouma_sigsetjmp(
   buf: *mut sigjmp_buf,
   c: c_int
