@@ -2,10 +2,11 @@ use {
   crate::{
     c_char,
     c_int,
+    char32_t,
     locale_t,
     mbstate_t,
     size_t,
-    std::{errno, stdio, stdlib, string},
+    std::{stdio, stdlib, string, uchar},
     support::locale,
     wchar_t,
     wint_t
@@ -35,11 +36,11 @@ pub extern "C" fn ouma_btowc(c: c_int) -> wint_t {
     return WEOF;
   }
   let buf = c as c_char;
-  // TODO: use mutex locking
-  static mut PRIVATE: mbstate_t = mbstate_t { seq: [0; 4], surrogate: 0 };
+  // TODO: mutex lock
+  static mut PRIV: mbstate_t = mbstate_t::new();
   let mut wc: wchar_t = 0;
   let status =
-    unsafe { ouma_mbrtowc(&mut wc, &buf as *const c_char, 1, &mut PRIVATE) };
+    unsafe { ouma_mbrtowc(&mut wc, &buf as *const c_char, 1, &mut PRIV) };
   if status == usize::max_value() || status == usize::max_value() - 1 {
     return WEOF;
   }
@@ -573,11 +574,7 @@ pub extern "C" fn ouma_wctob(c: wint_t) -> c_int {
 
 #[no_mangle]
 pub extern "C" fn ouma_mbsinit(ps: *const mbstate_t) -> c_int {
-  return unsafe {
-    (ps.is_null() ||
-      (((*ps).surrogate < 0xd800 || (*ps).surrogate > 0xdfff) &&
-        (*ps).seq == [0; 4])) as c_int
-  };
+  c_int::from(locale::mbstate_get_init(ps))
 }
 
 #[no_mangle]
@@ -597,18 +594,7 @@ pub extern "C" fn ouma_mbrtowc(
   n: size_t,
   ps: *mut mbstate_t
 ) -> size_t {
-  let (pwc, s, n) = if s.is_null() {
-    (pwc, b"\0" as *const u8 as *const c_char, 1)
-  } else {
-    (pwc, s, n)
-  };
-  let l = unsafe { (locale::ThreadLocale.ctype.mbrtowc)(pwc, s, n, ps) };
-  unsafe {
-    if l >= 0 && *pwc == '\0' as wchar_t {
-      return 0;
-    }
-  }
-  l as size_t
+  uchar::ouma_mbrtoc32(pwc as *mut char32_t, s, n, ps)
 }
 
 #[no_mangle]
@@ -619,43 +605,68 @@ extern "C" fn ouma_mbsnrtowcs(
   len: size_t,
   ps: *mut mbstate_t
 ) -> size_t {
-  let mut s1 = unsafe { *src };
-  let mut dsto: usize = 0;
-  let mut srco: usize = 0;
-
-  while (dst.is_null() || dsto < len) && srco < nmc {
-    let mut wc: wchar_t = 0;
-    let r = ouma_mbrtowc(&mut wc, s1.wrapping_add(srco), len - srco, ps);
-
-    if r == -1isize as usize {
-      unsafe { *src = s1.wrapping_add(srco) };
-      errno::set_errno(errno::EILSEQ);
-      return -1isize as usize;
-    }
-    if r == -2isize as usize {
-      unsafe { *src = s1.wrapping_add(nmc) };
-      errno::set_errno(errno::EILSEQ);
-      return -2isize as usize;
-    }
-    if !dst.is_null() {
-      unsafe {
-        *dst.wrapping_add(dsto) = wc;
+  let mut sb: *const c_char = unsafe { *src };
+  let mut nms = nmc;
+  let mut i = len;
+  if dst.is_null() {
+    let mut ret = 0;
+    loop {
+      let mut c32: char32_t = 0;
+      // TODO: implement get_locale()
+      let l =
+        unsafe { (locale::ThreadLocale.ctype.mbtoc32)(&mut c32, sb, nms, ps) };
+      match l {
+        | -1 => {
+          return -1isize as usize;
+        },
+        | -2 => {
+          return ret;
+        },
+        | _ => {
+          if c32 == 0 {
+            return ret;
+          }
+          sb = sb.wrapping_add(l as usize);
+          nms = nms.wrapping_sub(l as usize);
+          ret = ret.wrapping_add(1);
+        }
       }
     }
-    if wc == 0 {
-      s1 = ptr::null();
-      srco = 0;
-      break;
+  } else {
+    let mut db = dst;
+    while i > 0 {
+      // TODO: implement get_locale()
+      let l = unsafe {
+        (locale::ThreadLocale.ctype.mbtoc32)(db as *mut char32_t, sb, nms, ps)
+      };
+      match l {
+        | -1 => {
+          unsafe { *src = sb };
+          return -1isize as usize;
+        },
+        | -2 => unsafe {
+          *src = sb.wrapping_add(nms);
+          return db.offset_from(dst) as size_t;
+        },
+        | _ => {
+          unsafe {
+            if *db == 0 {
+              *src = ptr::null_mut();
+              return db.offset_from(dst) as size_t;
+            }
+          }
+          sb = sb.wrapping_add(l as usize);
+          nms = nms.wrapping_sub(l as usize);
+          db = db.wrapping_add(1);
+        }
+      }
+      i = i.wrapping_sub(1);
     }
-
-    dsto += 1;
-    srco += r;
+    unsafe {
+      *src = sb;
+      return db.offset_from(dst) as size_t;
+    }
   }
-
-  unsafe {
-    *src = s1.wrapping_add(srco);
-  }
-  dsto
 }
 
 #[no_mangle]
@@ -674,11 +685,7 @@ pub extern "C" fn ouma_wcrtomb(
   wc: wchar_t,
   ps: *mut mbstate_t
 ) -> size_t {
-  let mut buf: [c_char; stdlib::MB_LEN_MAX as usize] =
-    [0; stdlib::MB_LEN_MAX as usize];
-  let (s, wc) = if s.is_null() { (buf.as_mut_ptr(), 0) } else { (s, wc) };
-  let l = unsafe { (locale::ThreadLocale.ctype.wcrtomb)(s, wc, ps) };
-  l as size_t
+  uchar::ouma_c32rtomb(s, wc as char32_t, ps)
 }
 
 #[no_mangle]

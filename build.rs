@@ -27,6 +27,7 @@ fn main() {
     .flag("-Wextra")
     .flag("-Werror")
     .flag("-Wno-null-pointer-arithmetic")
+    .flag("-Wno-unused-but-set-variable")
     .include("include")
     .include(machine_include)
     .compile("dlmalloc");

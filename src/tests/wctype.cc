@@ -33,13 +33,12 @@ extern "C" {
   wint_t ouma_towlower_l(wint_t, locale_t);
   wint_t ouma_towupper(wint_t);
   wint_t ouma_towupper_l(wint_t, locale_t);
-
+  int ouma_iswctype(wint_t, wctype_t);
+  int ouma_iswctype_l(wint_t, wctype_t, locale_t);
   wctrans_t ouma_wctrans(const char *);
   wctrans_t ouma_wctrans_l(const char *, locale_t);
   wint_t ouma_towctrans(wint_t, wctrans_t);
   wint_t ouma_towctrans_l(wint_t, wctrans_t, locale_t);
-  int ouma_iswctype(wint_t, wctype_t);
-  int ouma_iswctype_l(wint_t, wctype_t, locale_t);
   wctype_t ouma_wctype(const char *);
   wctype_t ouma_wctype_l(const char *, locale_t);
 }
@@ -97,7 +96,7 @@ TEST(iswcntrl, examples) {
 }
 
 TEST(iswctype, good) {
-  wctype_t wt = wctype("upper");
+  wctype_t wt = ouma_wctype("upper");
   ASSERT_NE((wctype_t)0, wt);
   ASSERT_TRUE(ouma_iswctype('A', wt));
   ASSERT_FALSE(ouma_iswctype('a', wt));
@@ -245,4 +244,33 @@ TEST(towupper, examples) {
   ASSERT_EQ(L'Λ', ouma_towupper(L'λ'));
   ASSERT_EQ(L'𐐏', ouma_towupper(L'𐐏'));
   ASSERT_EQ(L'𐐏', ouma_towupper(L'𐐷'));
+}
+
+TEST(wctype, example) {
+  EXPECT_TRUE(ouma_wctype("alnum") != 0);
+  EXPECT_TRUE(ouma_wctype("alpha") != 0);
+  EXPECT_TRUE(ouma_wctype("blank") != 0);
+  EXPECT_TRUE(ouma_wctype("cntrl") != 0);
+  EXPECT_TRUE(ouma_wctype("digit") != 0);
+  EXPECT_TRUE(ouma_wctype("graph") != 0);
+  EXPECT_TRUE(ouma_wctype("lower") != 0);
+  EXPECT_TRUE(ouma_wctype("print") != 0);
+  EXPECT_TRUE(ouma_wctype("punct") != 0);
+  EXPECT_TRUE(ouma_wctype("space") != 0);
+  EXPECT_TRUE(ouma_wctype("upper") != 0);
+  EXPECT_TRUE(ouma_wctype("xdigit") != 0);
+  EXPECT_TRUE(ouma_wctype("monkeys") == 0);
+}
+
+TEST(wctrans, examples) {
+  EXPECT_EQ(wint_t('a'), ouma_towctrans(L'A', ouma_wctrans("tolower")));
+  EXPECT_EQ(WEOF, ouma_towctrans(WEOF, ouma_wctrans("tolower")));
+  EXPECT_EQ(wint_t('A'), ouma_towctrans(L'a', ouma_wctrans("toupper")));
+  EXPECT_EQ(WEOF, ouma_towctrans(WEOF, ouma_wctrans("toupper")));
+}
+
+TEST(towctrans, example) {
+  EXPECT_TRUE(ouma_wctrans("tolower") != 0);
+  EXPECT_TRUE(ouma_wctrans("toupper") != 0);
+  EXPECT_TRUE(ouma_wctrans("monkeys") == 0);
 }

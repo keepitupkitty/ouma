@@ -2,28 +2,28 @@ use crate::{
   c_char,
   c_schar,
   c_uchar,
+  char32_t,
   mbstate_t,
   size_t,
   ssize_t,
   std::errno,
-  support::locale,
-  wchar_t
+  support::locale
 };
 
-extern "C" fn mbrtowc(
-  pwc: *mut wchar_t,
+extern "C" fn mbtoc32(
+  pc32: *mut char32_t,
   s: *const c_char,
   n: size_t,
   ps: *mut mbstate_t
 ) -> ssize_t {
-  static mut PRIVATE: mbstate_t = mbstate_t { seq: [0; 4], surrogate: 0 };
+  static mut PRIV: mbstate_t = mbstate_t::new();
   let state = if !ps.is_null() {
     unsafe { &mut *ps }
   } else {
-    // TODO: use mutex locking
-    unsafe { &mut PRIVATE }
+    // TODO: mutex lock
+    unsafe { &mut PRIV }
   };
-  if n == 0 {
+  if n < 1 {
     return -2;
   }
   let uc: c_uchar = unsafe { *s as c_uchar };
@@ -31,17 +31,17 @@ extern "C" fn mbrtowc(
     errno::set_errno(errno::EILSEQ);
     return -1;
   }
-  unsafe { *pwc = uc as wchar_t };
+  unsafe { *pc32 = uc as char32_t };
   locale::mbstate_set_init(state);
   1
 }
 
-extern "C" fn wcrtomb(
+extern "C" fn c32tomb(
   s: *mut c_char,
-  wc: wchar_t,
+  wc: char32_t,
   _: *mut mbstate_t
 ) -> ssize_t {
-  if wc > c_schar::max_value() as wchar_t {
+  if wc > c_schar::max_value() as char32_t {
     errno::set_errno(errno::EILSEQ);
     return -1;
   }
@@ -51,7 +51,7 @@ extern "C" fn wcrtomb(
 
 pub const LOCALE_CTYPE_ASCII: locale::ctype::LocaleCtype =
   locale::ctype::LocaleCtype {
-    mbrtowc: mbrtowc,
-    wcrtomb: wcrtomb,
+    mbtoc32: mbtoc32,
+    c32tomb: c32tomb,
     mb_cur_max: 1
   };

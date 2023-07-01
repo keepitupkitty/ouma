@@ -226,7 +226,7 @@
 
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) || \
     __has_extension(c_generic_selections)
-#define __generic(expr, t, yes, no) _Generic(expr, t : yes, default : no)
+#define __generic(expr, t, yes, no) _Generic(expr, t: yes, default: no)
 #elif __GNUC_PREREQ__(3, 1) && !defined(__cplusplus)
 #define __generic(expr, t, yes, no) \
   __builtin_choose_expr(            \

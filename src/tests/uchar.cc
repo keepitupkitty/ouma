@@ -9,11 +9,19 @@
 #define UNICODE
 
 extern "C" {
-  size_t ouma_c16rtomb(char *__restrict, char16_t, mbstate_t *__restrict);
-  size_t ouma_c32rtomb(char *__restrict, char32_t, mbstate_t *__restrict);
-  size_t ouma_mbrtoc16(char16_t *__restrict, const char *__restrict, size_t, mbstate_t *__restrict);
-  size_t ouma_mbrtoc32(char32_t *__restrict, const char *__restrict, size_t, mbstate_t *__restrict);
-  int ouma_mbsinit(const mbstate_t *);
+  typedef struct {
+    char16_t __surrogate;
+    unsigned int __bytesleft;
+    char32_t __partial;
+    char32_t __lowerbound;
+  } __ouma_mbstate_t;
+  typedef __ouma_mbstate_t ouma_mbstate_t;
+
+  size_t ouma_c16rtomb(char *__restrict, char16_t, ouma_mbstate_t *__restrict);
+  size_t ouma_c32rtomb(char *__restrict, char32_t, ouma_mbstate_t *__restrict);
+  size_t ouma_mbrtoc16(char16_t *__restrict, const char *__restrict, size_t, ouma_mbstate_t *__restrict);
+  size_t ouma_mbrtoc32(char32_t *__restrict, const char *__restrict, size_t, ouma_mbstate_t *__restrict);
+  int ouma_mbsinit(const ouma_mbstate_t *);
 
   extern thread_local int __oumalibc_errno;
 }
@@ -22,7 +30,7 @@ extern "C" {
 
 TEST(c16rtomb, unicode) {
   char buf[MB_LEN_MAX];
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ(1, ouma_c16rtomb(buf, u'A', &mbs));
   ASSERT_EQ('A', buf[0]);
   ASSERT_NE(0, ouma_mbsinit(&mbs));
@@ -52,7 +60,7 @@ TEST(c32rtomb, unicode) {
 }
 
 TEST(mbrtoc16, unicode) {
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   char16_t c16;
   ASSERT_EQ(1, ouma_mbrtoc16(&c16, "Foo", 3, &mbs));
   ASSERT_EQ(u'F', c16);
@@ -68,13 +76,16 @@ TEST(mbrtoc16, unicode) {
   ASSERT_EQ((size_t)-3, ouma_mbrtoc16(&c16, "AAA", 3, &mbs));
   ASSERT_EQ(0xdc37, c16);
   ASSERT_NE(0, ouma_mbsinit(&mbs));
+  ASSERT_EQ(0, ouma_mbrtoc16(&c16, "", 1, &mbs));
+  ASSERT_EQ(u'\0', c16);
+  ASSERT_NE(0, ouma_mbsinit(&mbs));
   ASSERT_EQ((size_t)-2,
             ouma_mbrtoc16(&c16, "Some text", 0, &mbs));
   ASSERT_NE(0, ouma_mbsinit(&mbs));
 }
 
 TEST(mbrtoc32, unicode) {
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   char32_t c32;
   ASSERT_EQ(1, ouma_mbrtoc32(&c32, "Foo", 3, &mbs));
   ASSERT_EQ(U'F', c32);
@@ -99,7 +110,7 @@ TEST(mbrtoc32, unicode) {
 
 TEST(c16rtomb, ascii) {
   char c;
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ(1, ouma_c16rtomb(&c, u'A', &mbs));
   ASSERT_EQ('A', c);
   ASSERT_NE(0, ouma_mbsinit(&mbs));
@@ -129,7 +140,7 @@ TEST(c32rtomb, ascii) {
 }
 
 TEST(mbrtoc16, ascii) {
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   char16_t c16;
   ASSERT_EQ(1, ouma_mbrtoc16(&c16, "Foo", 3, &mbs));
   ASSERT_EQ(u'F', c16);
@@ -142,7 +153,7 @@ TEST(mbrtoc16, ascii) {
 }
 
 TEST(mbrtoc32, ascii) {
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   char32_t c32;
   ASSERT_EQ(1, ouma_mbrtoc32(&c32, "Foo", 3, &mbs));
   ASSERT_EQ(U'F', c32);

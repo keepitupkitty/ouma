@@ -2,7 +2,7 @@ pub mod ctype;
 pub mod numeric;
 pub mod time;
 
-use crate::{locale_t, mbstate_t, LocaleStruct};
+use crate::{c_uint, char16_t, char32_t, locale_t, mbstate_t, LocaleStruct};
 
 #[thread_local]
 pub static mut ThreadLocale: locale_t = LOCALE_C_UTF8;
@@ -14,9 +14,70 @@ pub const LOCALE_C_UTF8: locale_t =
   LocaleStruct { ctype: ctype::utf8::LOCALE_CTYPE_UTF8 };
 
 #[inline(always)]
-pub fn mbstate_set_init(ps: *mut mbstate_t) {
-  unsafe {
-    (*ps).surrogate = 0;
-    (*ps).seq = [0; 4];
+pub fn mbstate_set_init(mbs: *mut mbstate_t) {
+  if !mbs.is_null() {
+    unsafe {
+      *mbs = mbstate_t::new();
+    }
   }
+}
+
+#[inline(always)]
+pub fn mbstate_get_init(mbs: *const mbstate_t) -> bool {
+  return unsafe {
+    mbs.is_null() ||
+      ((*mbs).surrogate < 0xd800 || (*mbs).surrogate > 0xdfff) &&
+        (*mbs).bytesleft == 0
+  };
+}
+
+#[inline(always)]
+pub fn mbstate_set_multibyte(
+  mbs: *mut mbstate_t,
+  bytesleft: c_uint,
+  partial: char32_t,
+  lowerbound: char32_t
+) {
+  unsafe {
+    (*mbs).bytesleft = bytesleft;
+    (*mbs).partial = partial;
+    (*mbs).lowerbound = lowerbound;
+  }
+}
+
+#[inline(always)]
+pub fn mbstate_get_multibyte(
+  mbs: *const mbstate_t,
+  bytesleft: *mut c_uint,
+  partial: *mut char32_t,
+  lowerbound: *mut char32_t
+) {
+  unsafe {
+    *bytesleft = (*mbs).bytesleft;
+    *partial = (*mbs).partial;
+    *lowerbound = (*mbs).lowerbound;
+  }
+}
+
+#[inline(always)]
+pub fn mbstate_set_surrogate(
+  mbs: *mut mbstate_t,
+  surrogate: char16_t
+) {
+  assert_eq!(surrogate >= 0xd800 && surrogate <= 0xdfff, true);
+  unsafe { (*mbs).surrogate = surrogate };
+}
+
+#[inline(always)]
+pub fn mbstate_get_surrogate(
+  mbs: *const mbstate_t,
+  surrogate: *mut char16_t
+) -> bool {
+  unsafe {
+    if (*mbs).surrogate < 0xd800 || (*mbs).surrogate > 0xdfff {
+      return false;
+    }
+    *surrogate = (*mbs).surrogate;
+  }
+  return true;
 }

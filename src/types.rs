@@ -37,11 +37,20 @@ pub type char32_t = u32;
 
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct __mbstate_t {
-  pub seq: [c_uchar; 4],
-  pub surrogate: char16_t
+pub struct MBStateStruct {
+  pub surrogate: char16_t,
+  pub bytesleft: c_uint,
+  pub partial: char32_t,
+  pub lowerbound: char32_t
 }
-pub type mbstate_t = __mbstate_t;
+
+impl MBStateStruct {
+  pub const fn new() -> Self {
+    Self { bytesleft: 0, partial: 0, lowerbound: 0, surrogate: 0 }
+  }
+}
+
+pub type mbstate_t = MBStateStruct;
 
 // POSIX types
 #[derive(Clone, Copy)]

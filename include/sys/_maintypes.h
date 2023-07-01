@@ -140,7 +140,12 @@ typedef __kernel_uid32_t __uid_t; /* user id */
 typedef __int32_t __fd_mask;
 typedef __uint32_t __wint_t;
 
-struct __mbstate_t;
+typedef struct {
+  __char16_t __surrogate;
+  unsigned int __bytesleft;
+  __char32_t __partial;
+  __char32_t __lowerbound;
+} __mbstate_t;
 
 /*
  * Types for varargs. These are all provided by builtin types these

@@ -7,7 +7,18 @@
 
 #define UNICODE
 
+#define num_bytes 128
+#define NUM_WCHARS(num_bytes) ((num_bytes)/sizeof(wchar_t))
+
 extern "C" {
+  typedef struct {
+    char16_t __surrogate;
+    unsigned int __bytesleft;
+    char32_t __partial;
+    char32_t __lowerbound;
+  } __ouma_mbstate_t;
+  typedef __ouma_mbstate_t ouma_mbstate_t;
+
   wchar_t *ouma_wmemchr(const wchar_t *, wchar_t, size_t);
   int ouma_wmemcmp(const wchar_t *, const wchar_t *, size_t);
   wchar_t *ouma_wmemcpy(wchar_t *__restrict, const wchar_t *__restrict, size_t);
@@ -36,14 +47,14 @@ extern "C" {
   size_t ouma_wcsxfrm_l(wchar_t *__restrict, const wchar_t *__restrict, size_t, locale_t);
   wchar_t *ouma_wcsdup(const wchar_t *);
   int ouma_wctob(wint_t);
-  int ouma_mbsinit(const mbstate_t *);
-  size_t ouma_mbrtowc(wchar_t *__restrict, const char *__restrict, size_t, mbstate_t *__restrict);
-  size_t ouma_wcrtomb(char *__restrict, wchar_t, mbstate_t *__restrict); 
-  size_t ouma_mbsnrtowcs(wchar_t *__restrict, const char **__restrict, size_t, size_t, mbstate_t *__restrict);
-  size_t ouma_mbsrtowcs(wchar_t *__restrict, const char **__restrict, size_t, mbstate_t *__restrict);
-  size_t ouma_wcsnrtombs(char *__restrict, const wchar_t **__restrict, size_t, size_t, mbstate_t *__restrict);
-  size_t ouma_wcsrtombs(char *__restrict, const wchar_t **__restrict, size_t, mbstate_t *__restrict);
-  size_t ouma_mbrlen(const char *__restrict, size_t, mbstate_t *__restrict);
+  int ouma_mbsinit(const ouma_mbstate_t *);
+  size_t ouma_mbrtowc(wchar_t *__restrict, const char *__restrict, size_t, ouma_mbstate_t *__restrict);
+  size_t ouma_wcrtomb(char *__restrict, wchar_t, ouma_mbstate_t *__restrict); 
+  size_t ouma_mbsnrtowcs(wchar_t *__restrict, const char **__restrict, size_t, size_t, ouma_mbstate_t *__restrict);
+  size_t ouma_mbsrtowcs(wchar_t *__restrict, const char **__restrict, size_t, ouma_mbstate_t *__restrict);
+  size_t ouma_wcsnrtombs(char *__restrict, const wchar_t **__restrict, size_t, size_t, ouma_mbstate_t *__restrict);
+  size_t ouma_wcsrtombs(char *__restrict, const wchar_t **__restrict, size_t, ouma_mbstate_t *__restrict);
+  size_t ouma_mbrlen(const char *__restrict, size_t, ouma_mbstate_t *__restrict);
   wint_t ouma_btowc(int);
   int ouma_wcwidth(wchar_t);
   int ouma_wcswidth(const wchar_t *, size_t);
@@ -301,13 +312,13 @@ TEST(wctob, example) {
 
 TEST(mbsinit, init) {
   ASSERT_NE(0, ouma_mbsinit(NULL));
-  mbstate_t initial_mbstate{};
+  ouma_mbstate_t initial_mbstate{};
   ASSERT_NE(0, ouma_mbsinit(&initial_mbstate));
 }
 
 #ifndef UNICODE
 TEST(mbrtowc, ascii) {
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   wchar_t wc;
 
   // Valid character.
@@ -332,7 +343,7 @@ TEST(mbrtowc, ascii) {
 
 #ifdef UNICODE
 TEST(mbrtowc, unicode) {
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   wchar_t wc;
 
   // Valid character.
@@ -362,41 +373,56 @@ TEST(mbrtowc, unicode) {
 }
 #endif
 
-TEST(mbsnrtowcs, example) {
-  wchar_t dst[128];
-  const char* s = "hello, world!";
-  const char* src;
-  memset(dst, 0, sizeof(dst));
+static void test_mbsrtowcs(ouma_mbstate_t* ps) {
+  constexpr const char* VALID = "A" "\xc2\xa2" "\xe2\x82\xac" "\xf0\xa4\xad\xa2" "ef";
+  constexpr const char* INVALID = "A" "\xc2\x20" "ef";
+  constexpr const char* INCOMPLETE = "A" "\xc2";
+  wchar_t out[4];
+  const char* valid = VALID;
+  ASSERT_EQ(4U, ouma_mbsrtowcs(out, &valid, 4, ps));
+  ASSERT_EQ(L'A', out[0]);
+  ASSERT_EQ(static_cast<wchar_t>(0x00a2), out[1]);
+  ASSERT_EQ(static_cast<wchar_t>(0x20ac), out[2]);
+  ASSERT_EQ(static_cast<wchar_t>(0x24b62), out[3]);
+  ASSERT_EQ('e', *valid);
+  wmemset(out, L'x', NUM_WCHARS(sizeof(out)));
+  ASSERT_EQ(2U, ouma_mbsrtowcs(out, &valid, 4, ps));
+  ASSERT_EQ(L'e', out[0]);
+  ASSERT_EQ(L'f', out[1]);
+  ASSERT_EQ(L'\0', out[2]);
+  ASSERT_EQ(L'x', out[3]);
+  ASSERT_EQ(nullptr, valid);
+  const char* invalid = INVALID;
+  ASSERT_EQ(static_cast<size_t>(-1), ouma_mbsrtowcs(out, &invalid, 4, ps));
+  EXPECT_EQ(EILSEQ, __oumalibc_errno);
+  ASSERT_EQ('\xc2', *invalid);
+  const char* incomplete = INCOMPLETE;
+  ASSERT_EQ(static_cast<size_t>(-1), ouma_mbsrtowcs(out, &incomplete, 2, ps));
+  EXPECT_EQ(EILSEQ, __oumalibc_errno);
+  ASSERT_EQ('\xc2', *incomplete);
+  // If dst is null, *src shouldn't be updated.
+  const char* mbs = VALID;
+  EXPECT_EQ(6U, ouma_mbsrtowcs(nullptr, &mbs, 0, ps));
+  EXPECT_EQ(VALID, mbs);
+  mbs = INVALID;
+  EXPECT_EQ(static_cast<size_t>(-1), ouma_mbsrtowcs(nullptr, &mbs, 0, ps));
+  EXPECT_EQ(INVALID, mbs);
+  mbs = INCOMPLETE;
+  EXPECT_EQ(static_cast<size_t>(-1), ouma_mbsrtowcs(nullptr, &mbs, 0, ps));
+  EXPECT_EQ(INCOMPLETE, mbs);
+}
 
-  src = s;
-  ASSERT_EQ(0U, ouma_mbsnrtowcs(dst, &src, 0, 0, nullptr));
-  memset(dst, 0, sizeof(dst));
-
-  src = s;
-  ASSERT_EQ(2U, ouma_mbsnrtowcs(dst, &src, 2, 123, nullptr)); // glibc chokes on SIZE_MAX here.
-  ASSERT_EQ(L'h', dst[0]);
-  ASSERT_EQ(L'e', dst[1]);
-  ASSERT_EQ(&s[2], src);
-  memset(dst, 0, sizeof(dst));
-
-  src = s;
-  ASSERT_EQ(3U, ouma_mbsnrtowcs(dst, &src, SIZE_MAX, 3, nullptr));
-  ASSERT_EQ(L'h', dst[0]);
-  ASSERT_EQ(L'e', dst[1]);
-  ASSERT_EQ(L'l', dst[2]);
-  ASSERT_EQ(&s[3], src);
-  memset(dst, 0, sizeof(dst));
-
-  const char* incomplete = "\xc2"; // Incomplete UTF-8 sequence.
-  src = incomplete;
-  __oumalibc_errno = 0;
-  ASSERT_EQ(static_cast<size_t>(-1), ouma_mbsnrtowcs(dst, &src, SIZE_MAX, 3, nullptr));
-  ASSERT_EQ(EILSEQ, __oumalibc_errno);
-
-  src = incomplete;
-  __oumalibc_errno = 0;
-  ASSERT_EQ(static_cast<size_t>(-1), ouma_mbsnrtowcs(nullptr, &src, SIZE_MAX, 3, nullptr));
-  ASSERT_EQ(EILSEQ, __oumalibc_errno);
+TEST(mbsrtowcs, example) {
+  ouma_mbstate_t ps;
+  memset(&ps, 0, sizeof(ps));
+  test_mbsrtowcs(&ps);
+  test_mbsrtowcs(nullptr);
+  const char* invalid = "\x20";
+  wchar_t out;
+  ASSERT_EQ(static_cast<size_t>(-2), ouma_mbrtowc(&out, "\xc2", 1, &ps));
+  ASSERT_EQ(static_cast<size_t>(-1), ouma_mbsrtowcs(&out, &invalid, 1, &ps));
+  EXPECT_EQ(EILSEQ, __oumalibc_errno);
+  ASSERT_EQ('\x20', *invalid);
 }
 
 #ifndef UNICODE
@@ -422,7 +448,7 @@ TEST(wcsrtombs, ascii_ok) {
   // String should be fully converted.
   const wchar_t *src = L"Hello, world";
   char dst[13];
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ(sizeof(dst) - 1, ouma_wcsrtombs(dst, &src, sizeof(dst), &mbs));
   ASSERT_EQ(NULL, src);
   ASSERT_STREQ("Hello, world", dst);
@@ -432,7 +458,7 @@ TEST(wcsrtombs, ascii_bad_rightbefore) {
   // Conversion should stop right before the illegal character.
   const wchar_t *src = L"Hello, wørld";
   char dst[9];
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ(sizeof(dst) - 1, ouma_wcsrtombs(dst, &src, sizeof(dst) - 1, &mbs));
   ASSERT_STREQ(L"ørld", src);
   dst[8] = '\0';
@@ -443,7 +469,7 @@ TEST(wcsrtombs, ascii_bad) {
   // Conversion should stop due to the illegal character.
   const wchar_t *src = L"Hello, wørld";
   char dst[9];
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ((size_t)-1, ouma_wcsrtombs(dst, &src, sizeof(dst), &mbs));
   ASSERT_EQ(EILSEQ, __oumalibc_errno);
   ASSERT_STREQ(L"ørld", src);
@@ -452,7 +478,7 @@ TEST(wcsrtombs, ascii_bad) {
 TEST(wcsrtombs, ascii_null_ok) {
   // Length should be computed. Source should be left unmodified.
   const wchar_t *src = L"Hello, world";
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ(12, ouma_wcsrtombs(NULL, &src, 0, &mbs));
   ASSERT_STREQ(L"Hello, world", src);
 }
@@ -460,7 +486,7 @@ TEST(wcsrtombs, ascii_null_ok) {
 TEST(wcsrtombs, ascii_null_bad) {
   // Length cannot be computed. Source should be left unmodified.
   const wchar_t *src = L"Hello, wørld";
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ((size_t)-1, ouma_wcsrtombs(NULL, &src, 0, &mbs));
   ASSERT_STREQ(L"Hello, wørld", src);
 }
@@ -487,7 +513,7 @@ TEST(wcsrtombs, unicode) {
   // String should be fully converted.
   const wchar_t *src = L"ℕ ⊆ ℕ₀ ⊂ ℤ ⊂ ℚ ⊂ ℝ ⊂ ℂ";
   char dst[47];
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ(sizeof(dst) - 1,
             ouma_wcsrtombs(dst, &src, sizeof(dst), &mbs));
   ASSERT_EQ(NULL, src);
@@ -497,7 +523,7 @@ TEST(wcsrtombs, unicode) {
 TEST(mbrlen, unicode) {
   // Parse all bytes of a Euro symbol separately.
   char euro[] = "€";
-  mbstate_t mbs{};
+  ouma_mbstate_t mbs{};
   ASSERT_EQ((size_t)-2, ouma_mbrlen(&euro[0], 1, &mbs));
   ASSERT_EQ((size_t)-2, ouma_mbrlen(&euro[1], 1, &mbs));
   ASSERT_EQ(1, ouma_mbrlen(&euro[2], 1, &mbs));

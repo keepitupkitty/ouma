@@ -1,13 +1,33 @@
-use crate::{
-  c_char,
-  c_int,
-  locale_t,
-  mbstate_t,
-  std::stdlib,
-  wchar_t,
-  wctype_t,
-  wint_t
+use {
+  crate::{
+    c_char,
+    c_int,
+    char32_t,
+    locale_t,
+    mbstate_t,
+    std::{errno, stdlib},
+    wctrans_t,
+    wctype_t,
+    wint_t
+  },
+  core::ffi
 };
+
+const WCTYPE_ALNUM: wctype_t = 1;
+const WCTYPE_ALPHA: wctype_t = 2;
+const WCTYPE_BLANK: wctype_t = 3;
+const WCTYPE_CNTRL: wctype_t = 4;
+const WCTYPE_DIGIT: wctype_t = 5;
+const WCTYPE_GRAPH: wctype_t = 6;
+const WCTYPE_LOWER: wctype_t = 7;
+const WCTYPE_PRINT: wctype_t = 8;
+const WCTYPE_PUNCT: wctype_t = 9;
+const WCTYPE_SPACE: wctype_t = 10;
+const WCTYPE_UPPER: wctype_t = 11;
+const WCTYPE_XDIGIT: wctype_t = 12;
+
+const wctrans_tolower: wctrans_t = 1 as wctrans_t;
+const wctrans_toupper: wctrans_t = 2 as wctrans_t;
 
 // Perform binary search across character table.
 #[inline(always)]
@@ -57,14 +77,15 @@ fn valid_in_locale(
   wc: wint_t,
   locale: locale_t
 ) -> bool {
-  static mut PRIVATE: mbstate_t = mbstate_t { seq: [0; 4], surrogate: 0 };
+  // TODO: mutex lock
+  static mut PRIV: mbstate_t = mbstate_t::new();
   let buf: [c_char; stdlib::MB_LEN_MAX as usize] =
     [0; stdlib::MB_LEN_MAX as usize];
   return unsafe {
-    (locale.ctype.wcrtomb)(
+    (locale.ctype.c32tomb)(
       buf.as_ptr() as *mut c_char,
-      wc as wchar_t,
-      &mut PRIVATE
+      wc as char32_t,
+      &mut PRIV
     ) != -1
   };
 }
@@ -265,11 +286,24 @@ pub extern "C" fn ouma_iswcntrl_l(
 
 #[no_mangle]
 pub extern "C" fn ouma_iswctype(
-  _wc: wint_t,
-  _cc: wctype_t
+  wc: wint_t,
+  cc: wctype_t
 ) -> c_int {
-  // TODO: add iswctype
-  0
+  match cc {
+    | WCTYPE_ALNUM => ouma_iswalnum(wc),
+    | WCTYPE_ALPHA => ouma_iswalpha(wc),
+    | WCTYPE_BLANK => ouma_iswblank(wc),
+    | WCTYPE_CNTRL => ouma_iswcntrl(wc),
+    | WCTYPE_DIGIT => ouma_iswdigit(wc),
+    | WCTYPE_GRAPH => ouma_iswgraph(wc),
+    | WCTYPE_LOWER => ouma_iswlower(wc),
+    | WCTYPE_PRINT => ouma_iswprint(wc),
+    | WCTYPE_PUNCT => ouma_iswpunct(wc),
+    | WCTYPE_SPACE => ouma_iswspace(wc),
+    | WCTYPE_UPPER => ouma_iswupper(wc),
+    | WCTYPE_XDIGIT => ouma_iswxdigit(wc),
+    | _ => 0
+  }
 }
 
 #[no_mangle]
@@ -278,7 +312,21 @@ pub extern "C" fn ouma_iswctype_l(
   cc: wctype_t,
   locale: locale_t
 ) -> c_int {
-  c_int::from(ouma_iswctype(wc, cc) > 0 && valid_in_locale(wc, locale))
+  match cc {
+    | WCTYPE_ALNUM => ouma_iswalnum_l(wc, locale),
+    | WCTYPE_ALPHA => ouma_iswalpha_l(wc, locale),
+    | WCTYPE_BLANK => ouma_iswblank_l(wc, locale),
+    | WCTYPE_CNTRL => ouma_iswcntrl_l(wc, locale),
+    | WCTYPE_DIGIT => ouma_iswdigit_l(wc, locale),
+    | WCTYPE_GRAPH => ouma_iswgraph_l(wc, locale),
+    | WCTYPE_LOWER => ouma_iswlower_l(wc, locale),
+    | WCTYPE_PRINT => ouma_iswprint_l(wc, locale),
+    | WCTYPE_PUNCT => ouma_iswpunct_l(wc, locale),
+    | WCTYPE_SPACE => ouma_iswspace_l(wc, locale),
+    | WCTYPE_UPPER => ouma_iswupper_l(wc, locale),
+    | WCTYPE_XDIGIT => ouma_iswxdigit_l(wc, locale),
+    | _ => 0
+  }
 }
 
 #[no_mangle]
@@ -1283,4 +1331,89 @@ pub extern "C" fn ouma_towupper_l(
 ) -> wint_t {
   let nwc = ouma_towupper(wc);
   if valid_in_locale(nwc, locale) == true { nwc } else { wc }
+}
+
+#[no_mangle]
+pub extern "C" fn ouma_wctrans(charclass: *const c_char) -> wctrans_t {
+  let c = unsafe { ffi::CStr::from_ptr(charclass) };
+  match c.to_bytes() {
+    | b"tolower" => wctrans_tolower,
+    | b"toupper" => wctrans_toupper,
+    | _ => 0 as wctrans_t
+  }
+}
+
+#[no_mangle]
+pub extern "C" fn ouma_wctrans_l(
+  charclass: *const c_char,
+  _: locale_t
+) -> wctrans_t {
+  ouma_wctrans(charclass)
+}
+
+#[no_mangle]
+pub extern "C" fn ouma_towctrans(
+  wc: wint_t,
+  desc: wctrans_t
+) -> wint_t {
+  match desc {
+    | wctrans_tolower => ouma_towlower(wc),
+    | wctrans_toupper => ouma_towupper(wc),
+    | _ => {
+      errno::set_errno(errno::EINVAL);
+      0
+    }
+  }
+}
+
+#[no_mangle]
+pub extern "C" fn ouma_towctrans_l(
+  wc: wint_t,
+  desc: wctrans_t,
+  locale: locale_t
+) -> wint_t {
+  match desc {
+    | wctrans_tolower => ouma_towlower_l(wc, locale),
+    | wctrans_toupper => ouma_towupper_l(wc, locale),
+    | _ => {
+      errno::set_errno(errno::EINVAL);
+      0
+    }
+  }
+}
+
+#[no_mangle]
+pub extern "C" fn ouma_wctype(property: *const c_char) -> wctype_t {
+  let c = unsafe { ffi::CStr::from_ptr(property) };
+  const PROPERTIES: [&[u8]; 13] = [
+    b"<invalid>",
+    b"alnum",
+    b"alpha",
+    b"blank",
+    b"cntrl",
+    b"digit",
+    b"graph",
+    b"lower",
+    b"print",
+    b"punct",
+    b"space",
+    b"upper",
+    b"xdigit"
+  ];
+  let mut i = 0;
+  while i < PROPERTIES.len() {
+    if PROPERTIES[i] == c.to_bytes() {
+      return i as wctype_t;
+    }
+    i = i.wrapping_add(1);
+  }
+  0
+}
+
+#[no_mangle]
+pub extern "C" fn ouma_wctype_l(
+  property: *const c_char,
+  _: locale_t
+) -> wctype_t {
+  ouma_wctype(property)
 }

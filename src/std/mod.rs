@@ -1,4 +1,3 @@
-pub mod ctype;
 pub mod errno;
 pub mod signal;
 pub mod stdio;

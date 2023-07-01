@@ -1,20 +1,19 @@
-use {
-  crate::{
-    c_char,
-    c_int,
-    mbstate_t,
-    size_t,
-    ssize_t,
-    std::errno,
-    support::locale,
-    wchar_t
-  },
-  core::cmp
+use crate::{
+  c_char,
+  c_int,
+  c_uchar,
+  c_uint,
+  char32_t,
+  mbstate_t,
+  size_t,
+  ssize_t,
+  std::errno,
+  support::locale
 };
 
-extern "C" fn wcrtomb(
+extern "C" fn c32tomb(
   s: *mut c_char,
-  wc: wchar_t,
+  wc: char32_t,
   _: *mut mbstate_t
 ) -> ssize_t {
   let head: u8;
@@ -54,121 +53,105 @@ extern "C" fn wcrtomb(
   len as isize
 }
 
-extern "C" fn mbrtowc(
-  pwc: *mut wchar_t,
+extern "C" fn mbtoc32(
+  pc32: *mut char32_t,
   s: *const c_char,
   n: size_t,
   ps: *mut mbstate_t
 ) -> ssize_t {
-  let mut s1 = s;
-  static mut PRIVATE: mbstate_t = mbstate_t { seq: [0; 4], surrogate: 0 };
+  static mut PRIV: mbstate_t = mbstate_t::new();
   let state = if !ps.is_null() {
     unsafe { &mut *ps }
   } else {
-    // TODO: use mutex locking
-    unsafe { &mut PRIVATE }
+    // TODO: mutex lock
+    unsafe { &mut PRIV }
   };
-
-  if n == 0 {
+  let mut sb: *const c_uchar = s as *const c_uchar;
+  let mut i = n;
+  if i < 1 {
     return -2;
   }
-  let mut ch: u8 = unsafe { *s1 as u8 };
-  if (*state).seq == [0; 4] && (ch & !0x7f) == 0 {
-    if !pwc.is_null() {
-      unsafe { *pwc = ch as wchar_t };
-    }
-    if ch != 0 {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
 
-  let length: usize;
-  let mask;
-  let lowerbound: wchar_t;
-  let bytesleft: usize = if (*state).seq[2] != 0 {
-    3
-  } else if (*state).seq[1] != 0 {
-    2
-  } else if (*state).seq[0] != 0 {
-    1
-  } else {
-    0
-  };
-  ch = if bytesleft > 0 { (*state).seq[0] } else { unsafe { *s1 as u8 } };
-  if (ch & 0xe0) == 0xc0 {
-    mask = 0x1f;
-    length = 2;
-    lowerbound = 0x80;
-  } else if (ch & 0xf0) == 0xe0 {
-    mask = 0x0f;
-    length = 3;
-    lowerbound = 0x800;
-  } else if (ch & 0xf8) == 0xf0 {
-    mask = 0x07;
-    length = 4;
-    lowerbound = 0x10000;
-  } else {
-    (*state).seq = [0; 4];
-    errno::set_errno(errno::EILSEQ);
-    return -1;
-  }
+  let mut bytesleft: c_uint = 0;
+  let mut partial: char32_t = 0;
+  let mut lowerbound: char32_t = 0;
+  locale::mbstate_get_multibyte(
+    state,
+    &mut bytesleft,
+    &mut partial,
+    &mut lowerbound
+  );
 
-  let byteswanted: usize = length - bytesleft;
-  let mut i = 0;
-  while i < cmp::min(byteswanted, n) {
+  if bytesleft == 0 {
     unsafe {
-      if (*state).seq != [0; 4] && ((*s1 as u8 & 0xc0) != 0x80) {
+      if (*sb & 0x80) == 0 {
+        *pc32 = *sb as char32_t;
         locale::mbstate_set_init(state);
+        return 1;
+      } else if (*sb & 0xe0) == 0xc0 {
+        bytesleft = 1;
+        let s1 = sb;
+        sb = sb.wrapping_offset(1);
+        partial = *s1 as char32_t & 0x1f;
+        lowerbound = 0x80;
+      } else if (*sb & 0xf0) == 0xe0 {
+        bytesleft = 2;
+        let s1 = sb;
+        sb = sb.wrapping_offset(1);
+        partial = *s1 as char32_t & 0xf;
+        lowerbound = 0x800;
+      } else if (*sb & 0xf8) == 0xf0 {
+        bytesleft = 3;
+        let s1 = sb;
+        sb = sb.wrapping_offset(1);
+        partial = *s1 as char32_t & 0x7;
+        lowerbound = 0x10000;
+      } else {
         errno::set_errno(errno::EILSEQ);
         return -1;
       }
     }
-    let s2 = s1;
-    s1 = s1.wrapping_offset(1);
-    unsafe { (*state).seq[bytesleft.wrapping_add(i)] = *s2 as u8 };
-
-    i += 1;
-  }
-  if i < byteswanted {
-    return -2;
+    i = i.wrapping_sub(1);
   }
 
-  let mut c32: wchar_t = ((*state).seq[0] & mask) as wchar_t;
-  i = 1;
-  while i < length {
-    c32 <<= 6;
-    c32 |= ((*state).seq[i] & 0x3f) as wchar_t;
-    i += 1;
-  }
+  while i > 0 {
+    unsafe {
+      if (*sb & 0xc0) != 0x80 {
+        errno::set_errno(errno::EILSEQ);
+        return -1;
+      }
+    }
 
-  if c32 < lowerbound {
-    locale::mbstate_set_init(state);
-    errno::set_errno(errno::EILSEQ);
-    return -1;
-  }
-  if (c32 >= 0xd800 && c32 <= 0xdfff) || (c32 > 0x10ffff) {
-    locale::mbstate_set_init(state);
-    errno::set_errno(errno::EILSEQ);
-    return -1;
-  }
+    let s1 = sb;
+    sb = sb.wrapping_offset(1);
+    partial <<= 6;
+    partial |= unsafe { *s1 as char32_t & 0x3f };
 
-  if !pwc.is_null() {
-    unsafe { *pwc = c32 };
+    bytesleft = bytesleft.wrapping_sub(1);
+    if bytesleft == 0 {
+      if partial < lowerbound ||
+        (partial >= 0xd800 && partial <= 0xdfff) ||
+        partial > 0x10ffff
+      {
+        errno::set_errno(errno::EILSEQ);
+        return -1;
+      }
+      unsafe {
+        *pc32 = partial;
+      }
+      locale::mbstate_set_init(state);
+      return unsafe { sb.offset_from(s as *const c_uchar) };
+    }
+
+    i = i.wrapping_sub(1);
   }
-  if c32 == 0 {
-    locale::mbstate_set_init(state);
-    return 0;
-  } else {
-    locale::mbstate_set_init(state);
-    return byteswanted as isize;
-  }
+  locale::mbstate_set_multibyte(state, bytesleft, partial, lowerbound);
+  -2
 }
 
 pub const LOCALE_CTYPE_UTF8: locale::ctype::LocaleCtype =
   locale::ctype::LocaleCtype {
-    mbrtowc: mbrtowc,
-    wcrtomb: wcrtomb,
+    mbtoc32: mbtoc32,
+    c32tomb: c32tomb,
     mb_cur_max: 4
   };
