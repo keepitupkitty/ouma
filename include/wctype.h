@@ -39,6 +39,13 @@ typedef __wint_t wint_t;
 #define WEOF ((wint_t)-1)
 #endif
 
+#if __POSIX_VISIBLE >= 200809
+#ifndef _LOCALE_T_DEFINED_
+#define _LOCALE_T_DEFINED_
+typedef void *locale_t;
+#endif
+#endif
+
 __BEGIN_DECLS
 int iswalnum(wint_t);
 int iswalpha(wint_t);
