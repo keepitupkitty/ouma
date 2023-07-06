@@ -1,6 +1,5 @@
 use {
   crate::{
-    alloc::borrow::ToOwned,
     c_char,
     c_int,
     c_uchar,
@@ -648,9 +647,6 @@ fn build_sigstring(
   } else {
     "Unknown"
   };
-  if len < prefix.len() + 1 + "signal".len() {
-    return (prefix.to_owned() + " signal").as_ptr() as *const c_char;
-  }
 
   let mut w = streamwriter::StringWriter::new(buf, len);
   let _ = w.write_fmt(format_args!("{} signal {}", prefix, n));
