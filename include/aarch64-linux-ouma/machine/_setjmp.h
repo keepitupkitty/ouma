@@ -19,7 +19,7 @@
 
 #include <sys/cdefs.h>
 
-#define _JBLEN (32 * sizeof(_BSD_JBSLOT_T_) / sizeof(long))
+#define _JBLEN 32
 #define _JB_MAGIC 0
 #define _JB_SP 1
 #define _JB_X19 2
