@@ -72,18 +72,17 @@ fn towctrans_search(
   wc
 }
 
-#[inline(always)]
 fn valid_in_locale(
   wc: wint_t,
   locale: locale_t
 ) -> bool {
   // TODO: mutex lock
   static mut PRIV: mbstate_t = mbstate_t::new();
-  let buf: [c_char; stdlib::MB_LEN_MAX as usize] =
+  let mut buf: [c_char; stdlib::MB_LEN_MAX as usize] =
     [0; stdlib::MB_LEN_MAX as usize];
   return unsafe {
-    (locale.ctype.c32tomb)(
-      buf.as_ptr() as *mut c_char,
+    ((*locale).ctype.c32tomb).unwrap()(
+      buf.as_mut_ptr(),
       wc as char32_t,
       &mut PRIV
     ) != -1

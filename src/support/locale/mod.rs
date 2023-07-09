@@ -4,14 +4,31 @@ pub mod time;
 
 use crate::{c_uint, char16_t, char32_t, locale_t, mbstate_t, LocaleStruct};
 
-#[thread_local]
-pub static mut ThreadLocale: locale_t = LOCALE_C_UTF8;
-
-pub const LOCALE_C: locale_t =
+#[no_mangle]
+pub static mut LOCALE_C: LocaleStruct =
   LocaleStruct { ctype: ctype::ascii::LOCALE_CTYPE_ASCII };
 
-pub const LOCALE_C_UTF8: locale_t =
+#[no_mangle]
+pub static mut LOCALE_C_UTF8: LocaleStruct =
   LocaleStruct { ctype: ctype::utf8::LOCALE_CTYPE_UTF8 };
+
+#[thread_local]
+pub static mut ThreadLocale: LocaleStruct = unsafe { LOCALE_C };
+
+#[inline(always)]
+pub fn get_thread_locale() -> locale_t {
+  unsafe { &mut ThreadLocale }
+}
+
+#[inline(always)]
+pub fn get_thread_locale_struct() -> LocaleStruct {
+  unsafe { ThreadLocale }
+}
+
+#[inline(always)]
+pub fn set_thread_locale(locale: locale_t) {
+  unsafe { ThreadLocale = *locale };
+}
 
 #[inline(always)]
 pub fn mbstate_set_init(mbs: *mut mbstate_t) {

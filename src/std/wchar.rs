@@ -4,6 +4,7 @@ use {
     c_int,
     char32_t,
     locale_t,
+    malloc,
     mbstate_t,
     size_t,
     std::{stdio, stdlib, string, uchar},
@@ -515,7 +516,7 @@ pub extern "C" fn ouma_wcstok(
 #[no_mangle]
 pub extern "C" fn ouma_wcsdup(s: *const wchar_t) -> *mut wchar_t {
   let len = wstring_length(s) + 1;
-  let c: *mut wchar_t = stdlib::ouma_malloc(len) as *mut wchar_t;
+  let c: *mut wchar_t = unsafe { malloc::malloc(len) as *mut wchar_t };
   if c.is_null() {
     return ptr::null_mut();
   }
@@ -613,8 +614,9 @@ extern "C" fn ouma_mbsnrtowcs(
     loop {
       let mut c32: char32_t = 0;
       // TODO: implement get_locale()
-      let l =
-        unsafe { (locale::ThreadLocale.ctype.mbtoc32)(&mut c32, sb, nms, ps) };
+      let l = unsafe {
+        (locale::ThreadLocale.ctype.mbtoc32).unwrap()(&mut c32, sb, nms, ps)
+      };
       match l {
         | -1 => {
           return -1isize as usize;
@@ -637,7 +639,12 @@ extern "C" fn ouma_mbsnrtowcs(
     while i > 0 {
       // TODO: implement get_locale()
       let l = unsafe {
-        (locale::ThreadLocale.ctype.mbtoc32)(db as *mut char32_t, sb, nms, ps)
+        (locale::ThreadLocale.ctype.mbtoc32).unwrap()(
+          db as *mut char32_t,
+          sb,
+          nms,
+          ps
+        )
       };
       match l {
         | -1 => {

@@ -36,7 +36,7 @@ for sanitizers in none address leak; do
 
   RUSTFLAGS="$BUILD_RUSTFLAGS $SANITIZER_RUSTFLAGS" \
   cargo build --target $TARGET
-  for test in string uchar wchar wctype; do
+  for test in locale string uchar wchar wctype; do
     echo "Testing: $test"
     clang++ $BUILD_CFLAGS $SANITIZER_CFLAGS $BUILD_LDFLAGS \
       -lgtest -lgtest_main src/tests/${test}.cc \

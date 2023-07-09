@@ -34,7 +34,7 @@ pub extern "C" fn ouma_c16rtomb(
   }
 
   // TODO: implement get_locale()
-  let l = unsafe { (locale::ThreadLocale.ctype.c32tomb)(s, c32, ps) };
+  let l = unsafe { (locale::ThreadLocale.ctype.c32tomb).unwrap()(s, c32, ps) };
   if l >= 0 {
     locale::mbstate_set_init(ps);
   }
@@ -51,7 +51,7 @@ pub extern "C" fn ouma_c32rtomb(
     [0; stdlib::MB_LEN_MAX as usize];
   let (s, c32) = if s.is_null() { (buf.as_mut_ptr(), 0) } else { (s, c32) };
   // TODO: implement get_locale()
-  let l = unsafe { (locale::ThreadLocale.ctype.c32tomb)(s, c32, ps) };
+  let l = unsafe { (locale::ThreadLocale.ctype.c32tomb).unwrap()(s, c32, ps) };
   if l >= 0 {
     locale::mbstate_set_init(ps);
   }
@@ -83,7 +83,9 @@ pub extern "C" fn ouma_mbrtoc16(
   }
   let mut c32: char32_t = 0;
   // TODO: implement get_locale()
-  let l = unsafe { (locale::ThreadLocale.ctype.mbtoc32)(&mut c32, s, n, ps) };
+  let l = unsafe {
+    (locale::ThreadLocale.ctype.mbtoc32).unwrap()(&mut c32, s, n, ps)
+  };
   if l >= 0 {
     if c32 < 0x10000 {
       unsafe { *pc16 = c32 as char16_t };
@@ -117,7 +119,8 @@ pub extern "C" fn ouma_mbrtoc32(
     (pc32, s, n)
   };
   // TODO: implement get_locale()
-  let l = unsafe { (locale::ThreadLocale.ctype.mbtoc32)(pc32, s, n, ps) };
+  let l =
+    unsafe { (locale::ThreadLocale.ctype.mbtoc32).unwrap()(pc32, s, n, ps) };
   unsafe {
     if l >= 0 && *pc32 == '\0' as char32_t {
       return 0;

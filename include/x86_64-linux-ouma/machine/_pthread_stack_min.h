@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef _MACHINE_PTHREAD_STACK_MIN_H
-#define _MACHINE_PTHREAD_STACK_MIN_H
+#ifndef _MACHINE__PTHREAD_STACK_MIN_H
+#define _MACHINE__PTHREAD_STACK_MIN_H
 
-#define PTHREAD_STACK_MIN 131072
+#define PTHREAD_STACK_MIN 16384
 
-#endif /* !_MACHINE_PTHREAD_STACK_MIN_H */
+#endif /* !_MACHINE__PTHREAD_STACK_MIN_H */

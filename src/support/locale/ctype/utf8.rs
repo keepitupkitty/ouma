@@ -151,7 +151,9 @@ extern "C" fn mbtoc32(
 
 pub const LOCALE_CTYPE_UTF8: locale::ctype::LocaleCtype =
   locale::ctype::LocaleCtype {
-    mbtoc32: mbtoc32,
-    c32tomb: c32tomb,
+    copied: "true".as_ptr() as *const c_char,
+    codeset: "UTF-8".as_ptr() as *const c_char,
+    mbtoc32: Some(mbtoc32),
+    c32tomb: Some(c32tomb),
     mb_cur_max: 4
   };

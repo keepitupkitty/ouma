@@ -27,8 +27,9 @@ pub type uintptr_t = usize;
 pub type ssize_t = isize;
 
 // Platform dependent C language types
-// Wide character types
 pub use crate::arch::types::{c_char, c_long, c_ulong, wchar_t};
+
+// Wide character types
 pub type wint_t = u32;
 pub type wctype_t = c_ulong;
 pub type wctrans_t = *const int32_t;
@@ -53,11 +54,11 @@ impl MBStateStruct {
 pub type mbstate_t = MBStateStruct;
 
 // POSIX types
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 #[repr(C)]
 pub struct LocaleStruct {
   pub ctype: crate::support::locale::ctype::LocaleCtype
 }
-pub type locale_t = LocaleStruct;
+pub type locale_t = *mut LocaleStruct;
 
 // Linux-specific types

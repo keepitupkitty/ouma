@@ -66,7 +66,6 @@ extern "C" {
   int ouma_wcsncasecmp_l(const wchar_t *, const wchar_t *, size_t, locale_t);
 */
 
-  extern void ouma_free(void *);
   extern _Thread_local int __oumalibc_errno;
 }
 
@@ -294,7 +293,7 @@ TEST(wcstok, example) {
 TEST(wcsdup, hello) {
   wchar_t *copy = ouma_wcsdup(L"Hello");
   ASSERT_STREQ(L"Hello", copy);
-  ouma_free(copy);
+  free(copy);
 }
 
 TEST(wctob, example) {

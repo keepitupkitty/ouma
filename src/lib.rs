@@ -11,9 +11,9 @@ extern crate alloc;
 extern crate cbitset;
 
 mod api;
-mod dlmalloc;
 #[macro_use]
 mod macros;
+mod malloc;
 mod types;
 
 // Export types

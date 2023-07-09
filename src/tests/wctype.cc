@@ -5,42 +5,57 @@
 #include <locale.h>
 
 extern "C" {
+  struct LocaleCtype {
+    ssize_t (*mbtoc32)(char32_t*, const char*, size_t, mbstate_t*);
+    ssize_t (*c32tomb)(char*, char32_t, mbstate_t*);
+    int mb_cur_max;
+  };
+
+  struct LocaleStruct {
+    LocaleCtype ctype;
+  };
+
+  typedef struct LocaleStruct *ouma_locale_t;
+
   int ouma_iswalnum(wint_t);
-  int ouma_iswalnum_l(wint_t, locale_t);
+  int ouma_iswalnum_l(wint_t, ouma_locale_t);
   int ouma_iswalpha(wint_t);
-  int ouma_iswalpha_l(wint_t, locale_t);
+  int ouma_iswalpha_l(wint_t, ouma_locale_t);
   int ouma_iswblank(wint_t);
-  int ouma_iswblank_l(wint_t, locale_t);
+  int ouma_iswblank_l(wint_t, ouma_locale_t);
   int ouma_iswcntrl(wint_t);
-  int ouma_iswcntrl_l(wint_t, locale_t);
+  int ouma_iswcntrl_l(wint_t, ouma_locale_t);
   int ouma_iswdigit(wint_t);
-  int ouma_iswdigit_l(wint_t, locale_t);
+  int ouma_iswdigit_l(wint_t, ouma_locale_t);
   int ouma_iswgraph(wint_t);
-  int ouma_iswgraph_l(wint_t, locale_t);
+  int ouma_iswgraph_l(wint_t, ouma_locale_t);
   int ouma_iswlower(wint_t);
-  int ouma_iswlower_l(wint_t, locale_t);
+  int ouma_iswlower_l(wint_t, ouma_locale_t);
   int ouma_iswprint(wint_t);
-  int ouma_iswprint_l(wint_t, locale_t);
+  int ouma_iswprint_l(wint_t, ouma_locale_t);
   int ouma_iswpunct(wint_t);
-  int ouma_iswpunct_l(wint_t, locale_t);
+  int ouma_iswpunct_l(wint_t, ouma_locale_t);
   int ouma_iswspace(wint_t);
-  int ouma_iswspace_l(wint_t, locale_t);
+  int ouma_iswspace_l(wint_t, ouma_locale_t);
   int ouma_iswupper(wint_t);
-  int ouma_iswupper_l(wint_t, locale_t);
+  int ouma_iswupper_l(wint_t, ouma_locale_t);
   int ouma_iswxdigit(wint_t);
-  int ouma_iswxdigit_l(wint_t, locale_t);
+  int ouma_iswxdigit_l(wint_t, ouma_locale_t);
   wint_t ouma_towlower(wint_t);
-  wint_t ouma_towlower_l(wint_t, locale_t);
+  wint_t ouma_towlower_l(wint_t, ouma_locale_t);
   wint_t ouma_towupper(wint_t);
-  wint_t ouma_towupper_l(wint_t, locale_t);
+  wint_t ouma_towupper_l(wint_t, ouma_locale_t);
   int ouma_iswctype(wint_t, wctype_t);
-  int ouma_iswctype_l(wint_t, wctype_t, locale_t);
+  int ouma_iswctype_l(wint_t, wctype_t, ouma_locale_t);
   wctrans_t ouma_wctrans(const char *);
-  wctrans_t ouma_wctrans_l(const char *, locale_t);
+  wctrans_t ouma_wctrans_l(const char *, ouma_locale_t);
   wint_t ouma_towctrans(wint_t, wctrans_t);
-  wint_t ouma_towctrans_l(wint_t, wctrans_t, locale_t);
+  wint_t ouma_towctrans_l(wint_t, wctrans_t, ouma_locale_t);
   wctype_t ouma_wctype(const char *);
-  wctype_t ouma_wctype_l(const char *, locale_t);
+  wctype_t ouma_wctype_l(const char *, ouma_locale_t);
+
+  void ouma_freelocale(ouma_locale_t);
+  ouma_locale_t ouma_newlocale(int, const char *, ouma_locale_t);
 }
 
 TEST(iswalnum, examples) {
@@ -136,6 +151,20 @@ TEST(iswgraph, examples) {
   ASSERT_TRUE(ouma_iswgraph(L'.'));
   ASSERT_TRUE(ouma_iswgraph(L'€'));
   ASSERT_FALSE(ouma_iswgraph(L' '));
+}
+
+TEST(iswgraph, ascii) {
+  ouma_locale_t locale = ouma_newlocale(LC_CTYPE_MASK, ".US-ASCII", 0);
+  ASSERT_TRUE(ouma_iswgraph_l(L'0', locale));
+  ASSERT_TRUE(ouma_iswgraph_l(L'A', locale));
+  ASSERT_TRUE(ouma_iswgraph_l(L'a', locale));
+  ASSERT_FALSE(ouma_iswgraph_l(L'Å', locale));
+  ASSERT_FALSE(ouma_iswgraph_l(L'Ω', locale));
+  ASSERT_FALSE(ouma_iswgraph_l(L'д', locale));
+  ASSERT_TRUE(ouma_iswgraph_l(L'.', locale));
+  ASSERT_FALSE(ouma_iswgraph_l(L'€', locale));
+  ASSERT_FALSE(ouma_iswgraph_l(L' ', locale));
+  ouma_freelocale(locale);
 }
 
 TEST(iswlower, equality) {

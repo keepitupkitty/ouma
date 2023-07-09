@@ -88,4 +88,19 @@ struct lconv {
   char int_n_sign_posn;
 };
 
+#if __POSIX_VISIBLE >= 200809
+#define LC_GLOBAL_LOCALE ((locale_t)-1)
+#endif
+
+__BEGIN_DECLS
+struct lconv *localeconv(void);
+char *setlocale(int, const char *);
+#if __POSIX_VISIBLE >= 200809
+locale_t duplocale(locale_t);
+void freelocale(locale_t);
+locale_t newlocale(int, const char *, locale_t);
+locale_t uselocale(locale_t);
+#endif
+__END_DECLS
+
 #endif /* !_LOCALE_H */

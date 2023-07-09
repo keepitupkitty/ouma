@@ -1,4 +1,5 @@
 pub mod errno;
+pub mod locale;
 pub mod setjmp;
 pub mod signal;
 pub mod stdio;

@@ -27,16 +27,13 @@
 #include <linux/in6.h>
 #include <linux/ipv6.h>
 
+#define INET_ADDRSTRLEN 16
+
 __BEGIN_DECLS
-// TODO: implement them in rust
-int setipv4sourcefilter(int, struct in_addr, struct in_addr, uint32_t, uint32_t,
-                        struct in_addr *);
-int getipv4sourcefilter(int, struct in_addr, struct in_addr, uint32_t *,
-                        uint32_t *, struct in_addr *);
-int setsourcefilter(int, uint32_t, struct sockaddr *, socklen_t, uint32_t,
-                    uint32_t, struct sockaddr_storage *);
-int getsourcefilter(int, uint32_t, struct sockaddr *, socklen_t, uint32_t *,
-                    uint32_t *, struct sockaddr_storage *);
+typedef uint16_t in_port_t;
+
+/* TODO: implement bindresvport in Rust */
+int bindresvport(int, struct sockaddr_in*);
 __END_DECLS
 
 #endif /* !_NETINET_IN_H */

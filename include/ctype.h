@@ -46,6 +46,14 @@ int toupper(int);
 int isblank(int);
 #endif
 
+#if __BSD_VISIBLE || __XPG_VISIBLE
+int isascii(int);
+int toascii(int);
+
+static inline int _tolower(int _c) { return (_c - 'A' + 'a'); }
+static inline int _toupper(int _c) { return (_c - 'a' + 'A'); }
+#endif /* __BSD_VISIBLE || __XPG_VISIBLE */
+
 #if __POSIX_VISIBLE >= 200809
 int isalnum_l(int, locale_t);
 int isalpha_l(int, locale_t);

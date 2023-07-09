@@ -192,6 +192,6 @@
 #define LOGIN_NAME_MAX 256
 #define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
 
-#include <machine/pthread_stack_min.h>
+#include <machine/_pthread_stack_min.h>
 
 #endif /* !_LIMITS_H */

@@ -42,6 +42,6 @@
 #define _JB_D13 21
 #define _JB_D14 22
 #define _JB_D15 23
-#define _JB_SIGMASK	24
+#define _JB_SIGMASK 24
 
 #endif /* !_MACHINE__SETJMP_H */

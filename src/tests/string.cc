@@ -47,7 +47,6 @@ extern "C" {
   int ouma_strncasecmp_l(const char *, const char *, size_t, locale_t);
 */
 
-  extern void ouma_free(void *);
   extern _Thread_local int __oumalibc_errno;
   extern int __oumalibc_current_sigrtmax();
   extern int __oumalibc_current_sigrtmin();
@@ -766,17 +765,17 @@ TEST(strsignal, example) {
 TEST(strndup, null) {
   char *copy = ouma_strndup(NULL, 0);
   ASSERT_STREQ("", copy);
-  ouma_free(copy);
+  free(copy);
 }
 
 TEST(strndup, hello) {
   char *copy = ouma_strndup("Hello, world", 5);
   ASSERT_STREQ("Hello", copy);
-  ouma_free(copy);
+  free(copy);
 }
 
 TEST(strdup, hello) {
   char *copy = ouma_strdup("Hello");
   ASSERT_STREQ("Hello", copy);
-  ouma_free(copy);
+  free(copy);
 }
