@@ -59,6 +59,17 @@ pub type mbstate_t = MBStateStruct;
 pub struct LocaleStruct {
   pub ctype: crate::support::locale::ctype::LocaleCtype
 }
+
+impl LocaleStruct {
+  pub fn new() -> Self {
+    Self { ctype: crate::support::locale::ctype::LocaleCtype::new() }
+  }
+
+  pub fn as_ptr(&mut self) -> locale_t {
+    &mut *self
+  }
+}
+
 pub type locale_t = *mut LocaleStruct;
 
 // Linux-specific types

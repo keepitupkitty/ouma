@@ -5,8 +5,6 @@
 
 #include <wchar.h>
 
-#define UNICODE
-
 #define num_bytes 128
 #define NUM_WCHARS(num_bytes) ((num_bytes)/sizeof(wchar_t))
 

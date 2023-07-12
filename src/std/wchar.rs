@@ -16,6 +16,8 @@ use {
   core::{ffi::c_void, ptr}
 };
 
+use core::mem;
+
 pub const WEOF: wint_t = 0xFFFF_FFFFu32;
 
 #[inline(always)]
@@ -516,7 +518,7 @@ pub extern "C" fn ouma_wcstok(
 #[no_mangle]
 pub extern "C" fn ouma_wcsdup(s: *const wchar_t) -> *mut wchar_t {
   let len = wstring_length(s) + 1;
-  let c: *mut wchar_t = unsafe { malloc::malloc(len) as *mut wchar_t };
+  let c: *mut wchar_t = unsafe { malloc::malloc(len * mem::size_of::<wchar_t>()) as *mut wchar_t };
   if c.is_null() {
     return ptr::null_mut();
   }
@@ -606,6 +608,7 @@ extern "C" fn ouma_mbsnrtowcs(
   len: size_t,
   ps: *mut mbstate_t
 ) -> size_t {
+  let loc = unsafe { *locale::get_thread_locale() };
   let mut sb: *const c_char = unsafe { *src };
   let mut nms = nmc;
   let mut i = len;
@@ -613,10 +616,7 @@ extern "C" fn ouma_mbsnrtowcs(
     let mut ret = 0;
     loop {
       let mut c32: char32_t = 0;
-      // TODO: implement get_locale()
-      let l = unsafe {
-        (locale::ThreadLocale.ctype.mbtoc32).unwrap()(&mut c32, sb, nms, ps)
-      };
+      let l = (loc.ctype.mbtoc32).unwrap()(&mut c32, sb, nms, ps);
       match l {
         | -1 => {
           return -1isize as usize;
@@ -637,15 +637,7 @@ extern "C" fn ouma_mbsnrtowcs(
   } else {
     let mut db = dst;
     while i > 0 {
-      // TODO: implement get_locale()
-      let l = unsafe {
-        (locale::ThreadLocale.ctype.mbtoc32).unwrap()(
-          db as *mut char32_t,
-          sb,
-          nms,
-          ps
-        )
-      };
+      let l = (loc.ctype.mbtoc32).unwrap()(db as *mut char32_t, sb, nms, ps);
       match l {
         | -1 => {
           unsafe { *src = sb };

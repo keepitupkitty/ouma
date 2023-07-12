@@ -6,8 +6,6 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#define UNICODE
-
 extern "C" {
   typedef struct {
     char16_t __surrogate;

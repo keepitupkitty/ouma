@@ -21,11 +21,6 @@ pub fn get_thread_locale() -> locale_t {
 }
 
 #[inline(always)]
-pub fn get_thread_locale_struct() -> LocaleStruct {
-  unsafe { ThreadLocale }
-}
-
-#[inline(always)]
 pub fn set_thread_locale(locale: locale_t) {
   unsafe { ThreadLocale = *locale };
 }

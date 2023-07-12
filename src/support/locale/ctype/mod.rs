@@ -9,7 +9,6 @@ use {
 #[derive(Clone, Copy, Eq, PartialEq)]
 #[repr(C)]
 pub struct LocaleCtype {
-  pub copied: *const c_char,
   pub codeset: *const c_char,
   pub mbtoc32: Option<
     extern "C" fn(
@@ -27,12 +26,15 @@ pub struct LocaleCtype {
 impl LocaleCtype {
   pub fn new() -> Self {
     Self {
-      copied: ptr::null::<c_char>(),
       codeset: ptr::null::<c_char>(),
       mbtoc32: None,
       c32tomb: None,
       mb_cur_max: 0
     }
+  }
+
+  pub fn as_ptr(&mut self) -> *mut LocaleCtype {
+    &mut *self
   }
 }
 

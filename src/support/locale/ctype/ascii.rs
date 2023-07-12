@@ -51,7 +51,6 @@ extern "C" fn c32tomb(
 
 pub const LOCALE_CTYPE_ASCII: locale::ctype::LocaleCtype =
   locale::ctype::LocaleCtype {
-    copied: "true".as_ptr() as *const c_char,
     codeset: "US-ASCII".as_ptr() as *const c_char,
     mbtoc32: Some(mbtoc32),
     c32tomb: Some(c32tomb),

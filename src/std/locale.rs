@@ -128,8 +128,7 @@ pub extern "C" fn ouma_newlocale(
 ) -> locale_t {
   let loc = unsafe { ffi::CStr::from_ptr(locale).to_str().unwrap() };
   let mut rbase = base;
-  let mut newlocale: LocaleStruct =
-    LocaleStruct { ctype: locale::ctype::LocaleCtype::new() };
+  let mut newlocale: LocaleStruct = LocaleStruct::new();
 
   if loc.is_empty() || loc == "C" || loc == "POSIX" || mask == 0 {
     errno::set_errno(errno::EINVAL);
@@ -167,9 +166,8 @@ pub extern "C" fn ouma_newlocale(
           newlocale.$name = (*rbase).$name;
         } else if newlocale.$name != (*rbase).$name {
           different = true;
-          // TODO: actually make locale components to be pointers to
-          // other objects so we can drop "copied"
-          if newlocale.$name.copied.is_null() {
+          let $name = newlocale.$name.as_ptr();
+          if !$name.is_null() {
             errno::set_errno(errno::ENOENT);
             return ptr::null_mut();
           }
@@ -205,9 +203,6 @@ pub extern "C" fn ouma_setlocale(
   _mask: c_int,
   locale: *const c_char
 ) -> *mut c_char {
-  // TODO: scan environment for locale if available, create new locale
-  // and patch it's value, if locale is not in the list then return null and
-  // set errno to EINVAL
   unsafe {
     if locale.is_null() ||
       *locale == b'\0' as c_char ||
@@ -217,5 +212,8 @@ pub extern "C" fn ouma_setlocale(
       return "C".as_ptr() as *mut _;
     }
   }
+  // TODO: scan environment for locale if available, create new locale
+  // and patch it's value, if locale is not in the list then return null and
+  // set errno to EINVAL
   ptr::null_mut()
 }
