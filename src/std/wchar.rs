@@ -13,10 +13,8 @@ use {
     wint_t
   },
   cbitset::BitSet256,
-  core::{ffi::c_void, ptr}
+  core::{ffi::c_void, mem, ptr}
 };
-
-use core::mem;
 
 pub const WEOF: wint_t = 0xFFFF_FFFFu32;
 
@@ -518,7 +516,8 @@ pub extern "C" fn ouma_wcstok(
 #[no_mangle]
 pub extern "C" fn ouma_wcsdup(s: *const wchar_t) -> *mut wchar_t {
   let len = wstring_length(s) + 1;
-  let c: *mut wchar_t = unsafe { malloc::malloc(len * mem::size_of::<wchar_t>()) as *mut wchar_t };
+  let c: *mut wchar_t =
+    unsafe { malloc::malloc(len * mem::size_of::<wchar_t>()) as *mut wchar_t };
   if c.is_null() {
     return ptr::null_mut();
   }
