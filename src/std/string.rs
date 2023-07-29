@@ -601,7 +601,7 @@ pub extern "C" fn ouma_strerror_r(
 }
 
 #[no_mangle]
-pub extern "C" fn __ouma_gnu_strerror_r(
+pub extern "C" fn ouma_gnu_strerror_r(
   num: c_int,
   buf: *mut c_char,
   buflen: size_t
