@@ -215,7 +215,7 @@ pub extern "C" fn ouma_isxdigit_l(
 
 #[no_mangle]
 pub extern "C" fn ouma_toascii(c: c_int) -> c_int {
-  c_int::(c & 0x7F)
+  c_int::from(c & 0x7F)
 }
 
 #[no_mangle]
