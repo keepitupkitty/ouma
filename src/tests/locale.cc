@@ -5,6 +5,7 @@
 
 extern "C" {
   struct LocaleCtype {
+    const char *codeset;
     ssize_t (*mbtoc32)(char32_t*, const char*, size_t, mbstate_t*);
     ssize_t (*c32tomb)(char*, char32_t, mbstate_t*);
     int mb_cur_max;

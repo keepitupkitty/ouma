@@ -13,21 +13,21 @@ use {
   core::ffi
 };
 
-const WCTYPE_ALNUM: wctype_t = 1;
-const WCTYPE_ALPHA: wctype_t = 2;
-const WCTYPE_BLANK: wctype_t = 3;
-const WCTYPE_CNTRL: wctype_t = 4;
-const WCTYPE_DIGIT: wctype_t = 5;
-const WCTYPE_GRAPH: wctype_t = 6;
-const WCTYPE_LOWER: wctype_t = 7;
-const WCTYPE_PRINT: wctype_t = 8;
-const WCTYPE_PUNCT: wctype_t = 9;
-const WCTYPE_SPACE: wctype_t = 10;
-const WCTYPE_UPPER: wctype_t = 11;
-const WCTYPE_XDIGIT: wctype_t = 12;
+pub const WCTYPE_ALNUM: wctype_t = 1;
+pub const WCTYPE_ALPHA: wctype_t = 2;
+pub const WCTYPE_BLANK: wctype_t = 3;
+pub const WCTYPE_CNTRL: wctype_t = 4;
+pub const WCTYPE_DIGIT: wctype_t = 5;
+pub const WCTYPE_GRAPH: wctype_t = 6;
+pub const WCTYPE_LOWER: wctype_t = 7;
+pub const WCTYPE_PRINT: wctype_t = 8;
+pub const WCTYPE_PUNCT: wctype_t = 9;
+pub const WCTYPE_SPACE: wctype_t = 10;
+pub const WCTYPE_UPPER: wctype_t = 11;
+pub const WCTYPE_XDIGIT: wctype_t = 12;
 
-const wctrans_tolower: wctrans_t = 1 as wctrans_t;
-const wctrans_toupper: wctrans_t = 2 as wctrans_t;
+pub const WCTRANS_TOLOWER: wctrans_t = 1 as wctrans_t;
+pub const WCTRANS_TOUPPER: wctrans_t = 2 as wctrans_t;
 
 // Perform binary search across character table.
 #[inline(always)]
@@ -72,6 +72,7 @@ fn towctrans_search(
   wc
 }
 
+#[inline(always)]
 fn valid_in_locale(
   wc: wint_t,
   locale: locale_t
@@ -1336,8 +1337,8 @@ pub extern "C" fn ouma_towupper_l(
 pub extern "C" fn ouma_wctrans(charclass: *const c_char) -> wctrans_t {
   let c = unsafe { ffi::CStr::from_ptr(charclass) };
   match c.to_bytes() {
-    | b"tolower" => wctrans_tolower,
-    | b"toupper" => wctrans_toupper,
+    | b"tolower" => WCTRANS_TOLOWER,
+    | b"toupper" => WCTRANS_TOUPPER,
     | _ => 0 as wctrans_t
   }
 }
@@ -1356,8 +1357,8 @@ pub extern "C" fn ouma_towctrans(
   desc: wctrans_t
 ) -> wint_t {
   match desc {
-    | wctrans_tolower => ouma_towlower(wc),
-    | wctrans_toupper => ouma_towupper(wc),
+    | WCTRANS_TOLOWER => ouma_towlower(wc),
+    | WCTRANS_TOUPPER => ouma_towupper(wc),
     | _ => {
       errno::set_errno(errno::EINVAL);
       0
@@ -1372,8 +1373,8 @@ pub extern "C" fn ouma_towctrans_l(
   locale: locale_t
 ) -> wint_t {
   match desc {
-    | wctrans_tolower => ouma_towlower_l(wc, locale),
-    | wctrans_toupper => ouma_towupper_l(wc, locale),
+    | WCTRANS_TOLOWER => ouma_towlower_l(wc, locale),
+    | WCTRANS_TOUPPER => ouma_towupper_l(wc, locale),
     | _ => {
       errno::set_errno(errno::EINVAL);
       0
