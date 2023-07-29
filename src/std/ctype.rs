@@ -214,6 +214,11 @@ pub extern "C" fn ouma_isxdigit_l(
 }
 
 #[no_mangle]
+pub extern "C" fn ouma_toascii(c: c_int) -> c_int {
+  c_int::(c & 0x7F)
+}
+
+#[no_mangle]
 pub extern "C" fn ouma_tolower(c: c_int) -> c_int {
   ouma_tolower_l(c, locale::get_thread_locale())
 }
